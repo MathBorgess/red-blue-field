@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "repository": "MathBorgess/red-blue-field",
   "publication_status": "published",
   "issues": [
@@ -15,7 +15,7 @@
     },
     {
       "id": "RB-002",
-      "title": "Spec: revisar arquitetura, fronteira de testes e protocolo experimental",
+      "title": "Spec: AI Pentest, Agentic Red Teaming e estudo dos limites de defesa",
       "body_file": "02-spec.md",
       "intended_state": "open",
       "depends_on": [
@@ -27,7 +27,7 @@
     },
     {
       "id": "RB-003",
-      "title": "MVP: executar primeiro episódio completo de autorização entre tenants (S01)",
+      "title": "Fundação: executar episódio S01 em API real com escopo e evidência",
       "body_file": "03-episodio-s01.md",
       "intended_state": "open",
       "depends_on": [
@@ -39,7 +39,7 @@
     },
     {
       "id": "RB-004",
-      "title": "MVP: integrar agentes red/alvo e prompt injection com sink local (S02)",
+      "title": "Agentes: laço transparente red/alvo e prompt injection S02",
       "body_file": "04-red-e-s02.md",
       "intended_state": "open",
       "depends_on": [
@@ -88,13 +88,16 @@
     },
     {
       "id": "RB-008",
-      "title": "Estudo: executar campanha comparada e publicar dataset e traces",
+      "title": "Estudo: campanhas por frente, dataset, traces e limites dos guardrails",
       "body_file": "08-campanha-dataset.md",
       "intended_state": "open",
       "depends_on": [
         "RB-005",
         "RB-006",
-        "RB-007"
+        "RB-007",
+        "RB-009",
+        "RB-010",
+        "RB-015"
       ],
       "github_number": 8,
       "github_url": "https://github.com/MathBorgess/red-blue-field/issues/8",
@@ -102,17 +105,106 @@
     },
     {
       "id": "RB-009",
-      "title": "Expansão: selecionar cenários S05–S10 a partir dos resultados do piloto",
+      "title": "Agentic core: memória, tool misuse, loops e evidência hostil S05–S09",
       "body_file": "09-expansao.md",
       "intended_state": "open",
       "depends_on": [
-        "RB-008"
+        "RB-004"
       ],
       "github_number": 9,
       "github_url": "https://github.com/MathBorgess/red-blue-field/issues/9",
       "state_at_publication": "open"
+    },
+    {
+      "id": "RB-010",
+      "intended_state": "open",
+      "title": "Pentest local: API/banco, execução limitada e runner observável S11–S12",
+      "body_file": "10-pentest-local.md",
+      "depends_on": [
+        "RB-003"
+      ],
+      "github_number": 10,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/10",
+      "state_at_publication": "open"
+    },
+    {
+      "id": "RB-011",
+      "intended_state": "open",
+      "title": "Cloud lab: IAM, armazenamento, rede e disponibilidade S13–S15",
+      "body_file": "11-cloud-lab.md",
+      "depends_on": [
+        "RB-010"
+      ],
+      "github_number": 11,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/11",
+      "state_at_publication": "open"
+    },
+    {
+      "id": "RB-012",
+      "intended_state": "open",
+      "title": "Híbrido: serviço → comportamento do agente → cloud S16–S18",
+      "body_file": "12-cadeias-hibridas.md",
+      "depends_on": [
+        "RB-004",
+        "RB-009",
+        "RB-011"
+      ],
+      "github_number": 12,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/12",
+      "state_at_publication": "open"
+    },
+    {
+      "id": "RB-013",
+      "intended_state": "open",
+      "title": "Ferramentas: CrewAI, Radar, AgentDojo e Agent-SafetyBench",
+      "body_file": "13-frameworks-benchmarks.md",
+      "depends_on": [
+        "RB-004"
+      ],
+      "github_number": 13,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/13",
+      "state_at_publication": "open"
+    },
+    {
+      "id": "RB-014",
+      "intended_state": "open",
+      "title": "Portfólio: publicar 5–10 estudos com provas, correções e retestes",
+      "body_file": "14-portfolio.md",
+      "depends_on": [
+        "RB-008"
+      ],
+      "github_number": 14,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/14",
+      "state_at_publication": "open"
+    },
+    {
+      "id": "RB-015",
+      "intended_state": "open",
+      "title": "Auditoria: cobertura e verificador independente inspirados na Cloudflare",
+      "body_file": "15-auditoria-whitebox.md",
+      "depends_on": [
+        "RB-003"
+      ],
+      "github_number": 15,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/15",
+      "state_at_publication": "open"
+    },
+    {
+      "id": "RB-016",
+      "intended_state": "open",
+      "title": "Comparação opcional: adaptador PentAGI com escopo e evidência comuns",
+      "body_file": "16-adaptador-pentagi.md",
+      "depends_on": [
+        "RB-010",
+        "RB-015"
+      ],
+      "github_number": 16,
+      "github_url": "https://github.com/MathBorgess/red-blue-field/issues/16",
+      "state_at_publication": "open"
     }
   ],
   "published_on": "2026-10-18",
-  "verified_on": "2026-10-18"
+  "verified_on": "2026-10-18",
+  "revision": "0.2",
+  "revised_on": "2026-10-18"
 }

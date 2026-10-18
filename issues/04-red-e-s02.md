@@ -2,26 +2,26 @@
 
 ## Problema e resultado esperado
 
-O replay determinístico não mede como um modelo escolhe ferramentas ou reage a dados hostis. Integrar os agentes red e alvo por um broker de inferência e executar S02, mantendo os mesmos oráculos por efeito.
+Construir um agente compreensível e observar como escolhe ferramentas e reage a entrada hostil, antes de adotar uma plataforma maior.
 
-Dependência: [RB-003 / #3](https://github.com/MathBorgess/red-blue-field/issues/3).
+Dependências: [RB-003 / #3](https://github.com/MathBorgess/red-blue-field/issues/3).
 
 ## Escopo
 
-O red pode alterar apenas as superfícies sintéticas previstas no cenário. O assistente alvo atende uma tarefa legítima. A variante indireta usa documento recuperado; uma variante direta preserva a mesma intenção para comparação. A saída de dados usa somente um sink local.
+Red, assistente interno e broker separados. S02 direto/indireto com sink local; nenhuma ferramenta shell nesta fatia.
 
 ## Critérios de aceitação
 
-- [ ] Provedor, modelos, revisões, parâmetros e teto de gasto são definidos antes de chamadas reais.
-- [ ] Somente o broker possui a credencial; os participantes não têm HTTP genérico ou shell.
-- [ ] Red recebe feedback permitido, sem acesso ao canary reservado ou ao veredito oculto.
-- [ ] O efeito é medido no sink e na resposta entregue; recusa tardia não apaga saída parcial.
-- [ ] Perfil B aplica identidade, capacidades e fluxo de origem/destino fora do LLM.
-- [ ] Chamadas, recusas, erros, tentativas descartadas e consumo conhecido aparecem nos traces.
-- [ ] `fixture_replay` e `model_run` são identificados separadamente nos dados.
+- [ ] Explicar e registrar objetivo, hipótese, tarefa, ação, observação e revisão do plano.
+- [ ] Definir modelo, revisão, parâmetros e orçamento antes de chamadas reais; broker conserva credenciais.
+- [ ] Red recebe só superfícies e feedback permitidos, sem oráculo/canary reservado.
+- [ ] Canary é verificado no sink/saída; recusa tardia não apaga vazamento parcial.
+- [ ] Comparar controles internos por ablação e manter contenção externa constante.
+- [ ] Separar desvio do modelo, ação proposta, bloqueio do executor e efeito no alvo.
+- [ ] Model_run, tool_run e replay permanecem distinguíveis; falhas e consumo entram no trace.
 
 ## Verificação
 
-Comparar tarefa legítima, entrada hostil direta e documento hostil, com mesmo alvo e orçamento. Confirmar cada alegação no estado, sem usar o relato do red ou do alvo como rótulo. Fixar a configuração antes do conjunto reservado.
+Tarefa legítima, entrada direta hostil e documento hostil pareados. Fixar contexto e orçamento; verificar efeito fora da narrativa dos agentes.
 
-Referências: [S02 e controles](https://github.com/MathBorgess/red-blue-field/blob/main/docs/scenarios.md), [desenho experimental](https://github.com/MathBorgess/red-blue-field/blob/main/docs/experiment-design.md).
+Referências: [S02](https://github.com/MathBorgess/red-blue-field/blob/main/docs/scenarios.md), [referência de planejador PentAGI](https://github.com/MathBorgess/red-blue-field/blob/main/docs/reference-blueprints.md), [experimento](https://github.com/MathBorgess/red-blue-field/blob/main/docs/experiment-design.md).

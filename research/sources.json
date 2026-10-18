@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "retrieved_on": "2026-10-18",
   "selection": "Fontes públicas primárias; resumos próprios. Conteúdo privado não é distribuído.",
   "sources": [
@@ -178,6 +178,195 @@
       "access_level": "overview_accessed",
       "limitation": "Referência de ciclo de vida seguro, não medição de eficácia do laboratório.",
       "illustrative_scenario_id": "S09"
+    },
+    {
+      "id": "SRC17",
+      "title": "PentAGI",
+      "publisher": "VXControl",
+      "url": "https://github.com/vxcontrol/pentagi",
+      "published_on": null,
+      "evidence_type": "open_source_reference",
+      "access_level": "content_accessed",
+      "limitation": "Arquitetura e capacidades documentadas, não eficácia validada neste laboratório. Export JSON do nosso dataset não é presumido.",
+      "illustrative_scenario_id": "S11",
+      "consulted_revision": "843dfeb4bfc809c09d1bc5022e567c602d8fc9dd",
+      "consulted_paths": [
+        "README.md"
+      ],
+      "license_observed": "MIT (core; review dependency/service terms separately)"
+    },
+    {
+      "id": "SRC18",
+      "title": "security-audit-skill",
+      "publisher": "Cloudflare",
+      "url": "https://github.com/cloudflare/security-audit-skill",
+      "published_on": null,
+      "evidence_type": "open_source_reference",
+      "access_level": "content_accessed",
+      "limitation": "Método de auditoria de código e validação local; não runner cloud nem resultado nosso.",
+      "illustrative_scenario_id": "S11",
+      "consulted_revision": "c1c8a8c1471069fb0e188eeaff69b8e8db6564a8",
+      "consulted_paths": [
+        "README.md",
+        "skills/security-audit/SKILL.md",
+        "skills/security-audit/VALIDATION-AND-REPORTING.md",
+        "skills/security-audit/report-schema.json"
+      ],
+      "license_observed": "MIT"
+    },
+    {
+      "id": "SRC19",
+      "title": "The Agentic AI Security Scoping Matrix",
+      "publisher": "AWS Security",
+      "url": "https://aws.amazon.com/blogs/security/the-agentic-ai-security-scoping-matrix-a-framework-for-securing-autonomous-ai-systems/",
+      "published_on": "2025-11-21",
+      "evidence_type": "security_framework",
+      "access_level": "content_accessed",
+      "limitation": "Quatro escopos de agência; não equivale à matriz GenAI ou aos perfis A/B/C/D.",
+      "illustrative_scenario_id": "S16"
+    },
+    {
+      "id": "SRC20",
+      "title": "Web Security Testing Guide",
+      "publisher": "OWASP",
+      "url": "https://owasp.org/www-project-web-security-testing-guide/",
+      "published_on": null,
+      "evidence_type": "security_guidance",
+      "access_level": "content_accessed",
+      "limitation": "Fixar edição e testes usados; referência de método, não cobertura automática.",
+      "illustrative_scenario_id": "S11"
+    },
+    {
+      "id": "SRC21",
+      "title": "API Security Top 10 — 2023",
+      "publisher": "OWASP",
+      "url": "https://owasp.org/API-Security/editions/2023/en/0x11-t10/",
+      "published_on": null,
+      "evidence_type": "security_framework",
+      "access_level": "content_accessed",
+      "limitation": "Taxonomia clássica de API distinta da edição Agentic 2026.",
+      "illustrative_scenario_id": "S01"
+    },
+    {
+      "id": "SRC22",
+      "title": "CrewAI",
+      "publisher": "CrewAI",
+      "url": "https://github.com/crewAIInc/crewAI",
+      "published_on": null,
+      "evidence_type": "open_source_reference",
+      "access_level": "content_accessed",
+      "limitation": "Framework aberto; modelo, infraestrutura e ofertas comerciais têm condições próprias.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC23",
+      "title": "Agentic Radar",
+      "publisher": "SPLX",
+      "url": "https://github.com/splx-ai/agentic-radar",
+      "published_on": null,
+      "evidence_type": "open_source_reference",
+      "access_level": "content_accessed",
+      "limitation": "Scan e runtime test têm coberturas diferentes por framework na revisão consultada.",
+      "illustrative_scenario_id": "S03"
+    },
+    {
+      "id": "SRC24",
+      "title": "Agent-SafetyBench",
+      "publisher": "THU-COAI",
+      "url": "https://github.com/thu-coai/Agent-SafetyBench",
+      "published_on": null,
+      "evidence_type": "open_source_reference",
+      "access_level": "content_accessed",
+      "limitation": "Benchmark comportamental; escore não comprova autorização ou efeito real em serviços.",
+      "illustrative_scenario_id": "S05"
+    },
+    {
+      "id": "SRC25",
+      "title": "CloudGoat",
+      "publisher": "Rhino Security Labs",
+      "url": "https://github.com/RhinoSecurityLabs/cloudgoat",
+      "published_on": null,
+      "evidence_type": "open_source_reference",
+      "access_level": "content_accessed",
+      "limitation": "Laboratórios cloud vulneráveis por desenho; rever IaC, custo, licença e escopo antes de adaptar.",
+      "illustrative_scenario_id": "S13"
+    },
+    {
+      "id": "SRC26",
+      "title": "Penetration Testing",
+      "publisher": "AWS",
+      "url": "https://aws.amazon.com/security/penetration-testing/",
+      "published_on": null,
+      "evidence_type": "provider_policy",
+      "access_level": "content_accessed",
+      "limitation": "Política dinâmica e dependente de serviço/atividade; conta própria não equivale a permissão irrestrita.",
+      "illustrative_scenario_id": "S13"
+    },
+    {
+      "id": "SRC27",
+      "title": "Amazon Bedrock Guardrails",
+      "publisher": "AWS",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Filtro do modelo não substitui autorização do serviço ou IAM.",
+      "illustrative_scenario_id": "S16"
+    },
+    {
+      "id": "SRC28",
+      "title": "Policy evaluation logic",
+      "publisher": "AWS IAM",
+      "url": "https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Permissão efetiva depende do conjunto de políticas, recursos, condições e ações.",
+      "illustrative_scenario_id": "S13"
+    },
+    {
+      "id": "SRC29",
+      "title": "What is AWS Fault Injection Service?",
+      "publisher": "AWS",
+      "url": "https://docs.aws.amazon.com/fis/latest/userguide/what-is.html",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Falha injetada pelo controlador não prova capacidade ofensiva do agente.",
+      "illustrative_scenario_id": "S15"
+    },
+    {
+      "id": "SRC30",
+      "title": "What is Amazon Bedrock AgentCore?",
+      "publisher": "AWS",
+      "url": "https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Candidato gerenciado, sujeito a oferta, cobrança e política de uso; não requisito inicial.",
+      "illustrative_scenario_id": "S16"
+    },
+    {
+      "id": "SRC31",
+      "title": "Amazon Bedrock Agents Classic",
+      "publisher": "AWS",
+      "url": "https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Documentação consultada informa manutenção e indisponibilidade para novos clientes; não base de novo projeto.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC32",
+      "title": "OWASP GenAI / LLM Top 10 — 2026",
+      "publisher": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/",
+      "published_on": null,
+      "evidence_type": "security_framework",
+      "access_level": "content_accessed",
+      "limitation": "Lista LLM/GenAI distinta de Agentic; fixar edição sem converter automaticamente os IDs antigos.",
+      "illustrative_scenario_id": "S02"
     }
   ]
 }

@@ -20,3 +20,7 @@ Dependência: [RB-004 / #4](https://github.com/MathBorgess/red-blue-field/issues
 Executar o episódio com catálogo limpo, alterado e restaurado. Conferir efeitos e utilidade; um detector que apenas reconhece uma frase fixa não encerra o critério. Reservar variantes de apresentação para a avaliação final.
 
 Referências: [pesquisa sobre tool poisoning](https://github.com/MathBorgess/red-blue-field/blob/main/docs/research.md), [catálogo S03](https://github.com/MathBorgess/red-blue-field/blob/main/scenarios/catalog.json).
+
+## Revisão 0.2
+
+Aplicar os contratos de contexto/efeitos 0.2 e manter o controle sob teste separado da contenção externa. Guardrail do modelo, autorização da ferramenta e autorização do serviço têm resultados separados.

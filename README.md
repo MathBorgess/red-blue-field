@@ -1,43 +1,51 @@
-# red-blue-field
+# red-blue-field — AI Pentest & Agentic Red Teaming
 
-Laboratório de estudo de cybersecurity e de defesa de sistemas com agentes de IA. A proposta reúne uma aplicação fictícia, um agente red team e um agente blue team. Cada execução deverá produzir evidências do ataque, da defesa e do efeito observado na aplicação.
+Projeto de referência para aprender a construir agentes, usar agentes em pentest, atacar o comportamento de agentes e verificar defesa e recuperação com evidência reproduzível.
 
-**Estado em 18/10/2026:** pesquisa e desenho experimental. A aplicação, os agentes e o executor ainda não foram implementados. Não há resultados experimentais nem dataset de ataques executados nesta revisão.
+**Revisão 0.2 · 18/10/2026:** pesquisa, especificação e contratos. Aplicação, runners e agentes ainda não implementados; nenhum pentest ou recurso cloud foi executado nesta revisão.
 
-## O que queremos descobrir
+## Três frentes de estudo
 
-- Quais falhas vêm da aplicação, das permissões, do modelo ou da composição das ferramentas?
-- Quanto uma defesa determinística resolve antes da participação do blue team?
-- Quando o agente de defesa melhora detecção, contenção e recuperação?
-- Em quais ações a intervenção humana muda o resultado, e com qual custo?
-- Conseguimos reconstruir cada conclusão a partir de eventos e do estado do sistema?
+| Frente | O que é atacado | O que precisa ser provado |
+| --- | --- | --- |
+| Pentest com agentes | APIs, banco, serviços executáveis e configurações cloud do laboratório. | Acesso ou efeito indevido confirmado no alvo, com contribuição do agente comparada a execução manual e scripts. |
+| Agentic red teaming | Objetivo, ferramentas, memória, delegação, aprovações e autonomia do agente interno. | Desvio observável de tarefa e chamadas propostas/executadas, mesmo quando outra camada impede o dano. |
+| Cadeias híbridas | Caminhos entre serviço vulnerável, agente interno e recursos cloud. | Cada transição da cadeia, permissões efetivas, efeito final e resposta blue. |
+
+O FieldDesk continua como aplicação fictícia central. O laboratório acrescenta APIs e banco vulneráveis executáveis, worker descartável para provas de execução e recursos cloud efêmeros. IAM, regras de rede e disponibilidade são parte do currículo.
+
+## Progressão
+
+1. Construir e explicar um agente simples, suas ferramentas, identidade e memória.
+2. Executar o mesmo teste manualmente, com script e com agente.
+3. Confirmar uma invasão em serviços locais próprios e corrigir a falha.
+4. Desviar o agente interno por entradas e ferramentas, testar memória e ciclos.
+5. Reproduzir casos selecionados em cloud sandbox e observar mudanças reais de configuração.
+6. Encadear as duas frentes, conter com blue e medir recuperação.
+7. Publicar dataset, traces e estudos técnicos sustentados por execuções.
+
+Replay, serviço local real, emulação cloud e cloud real terão rótulos separados. O currículo avança por evidência e compreensão do mecanismo.
 
 ## Leitura
 
-1. [Pesquisa e limites das evidências](docs/research.md).
-2. [Cenários hipotéticos](docs/scenarios.md) e [catálogo estruturado](scenarios/catalog.json).
-3. [Arquitetura proposta](docs/architecture.md).
-4. [Desenho experimental e métricas](docs/experiment-design.md).
-5. [Dataset, traces e publicação](docs/observability.md).
-6. [Trilha de estudo](docs/study-plan.md).
-7. [Vocabulário](GLOSSARY.md) e [fontes primárias](research/sources.json).
-8. [Spec produzida com to-spec, para avaliação](SPEC.md) · [revisão na issue #2](https://github.com/MathBorgess/red-blue-field/issues/2).
-9. [Issues, critérios de aceitação e dependências](issues/README.md).
+- [Spec e critérios de aceitação](SPEC.md) · [issue de revisão #2](https://github.com/MathBorgess/red-blue-field/issues/2).
+- [Arquitetura e fronteiras](docs/architecture.md) · [escopo de cada laboratório](docs/lab-scope.md).
+- [18 cenários](docs/scenarios.md) · [catálogo estruturado](scenarios/catalog.json).
+- [Experimentos e métricas](docs/experiment-design.md) · [dataset e traces](docs/observability.md).
+- [Trilha de aprendizado](docs/study-plan.md) · [ferramentas e referências verificadas](docs/tooling-and-references.md).
+- [O que construir com referências do PentAGI e da skill da Cloudflare](docs/reference-blueprints.md).
+- [Etapa cloud](docs/cloud-lab.md) · [oito estudos de portfólio planejados](docs/portfolio-plan.md).
+- [Pesquisa de casos](docs/research.md) · [fontes públicas](research/sources.json) · [vocabulário](GLOSSARY.md).
+- [Issues e dependências](issues/README.md) · [validação documental](docs/validation.md).
 
-## Primeiro recorte proposto
+## Limite sob teste e contenção
 
-O **FieldDesk** é um help desk fictício com dois tenants, tickets, documentos públicos e internos, reembolsos simulados e uma caixa de saída local. Seu assistente de produto é o alvo das manipulações por linguagem. Ele é um componente da aplicação; o blue team é um defensor separado.
+Guardrails do modelo, permissões de ferramentas, autorização da aplicação e políticas cloud serão testadas separadamente e em composição. O controle externo de escopo permanece fixo: protege host, coletor e recursos fora do episódio, sem corrigir antecipadamente a falha intencional do alvo.
 
-O MVP cobre autorização entre tenants, prompt injection, envenenamento de metadados de ferramentas e aprovação humana. Os outros cenários entram depois de validar isolamento, coleta de evidência e avaliação independente.
+As provas usam ambientes próprios, dados sintéticos e efeitos recuperáveis dentro do contrato do episódio. Em cloud, conta/região/recursos, regras do provedor, orçamento e teardown são definidos antes da execução. A publicação deste plano não provisiona recursos ou autoriza gasto.
 
-O red team pode variar entradas e sequências de ações dentro do cenário. O blue team observa eventos permitidos e propõe ou executa respostas limitadas. Um controlador fora dos agentes impõe escopo, orçamento e interrupção; um avaliador separado verifica o efeito real. O isolamento é constante em todos os grupos experimentais.
+## Evidência por execução
 
-## O que conta como execução
+Manifesto e escopo versionados, ferramentas propostas e executadas, logs do alvo, auditoria cloud quando aplicável, estados antes/depois, veredito independente e relatório. Ausência de execução, recusa do modelo, limite de orçamento e falha de infraestrutura são resultados diferentes.
 
-Uma execução só será considerada válida com manifesto, eventos correlacionados, estado inicial/final e veredito verificável. Tentativas interrompidas e falhas de infraestrutura também serão registradas. Exemplos de formato deverão ser identificados como ilustrativos e nunca entrar no cálculo das métricas.
-
-O repositório público receberá apenas dados sintéticos e exportações revisadas. O desenho usa ferramentas locais específicas e não depende de conectores com contas reais.
-
-## Publicação
-
-Repositório público: [MathBorgess/red-blue-field](https://github.com/MathBorgess/red-blue-field). O backlog fica em [GitHub Issues](https://github.com/MathBorgess/red-blue-field/issues); pesquisa, spec e contratos são versionados junto do projeto. A publicação das propostas não constitui execução dos experimentos.
+Uma mudança de comportamento não prova invasão de serviço. Uma chamada aceita não prova alteração efetiva. O relatório deve demonstrar o efeito e identificar a camada que bloqueou ou falhou.

@@ -1,0 +1,47 @@
+{
+  "schema_version": "0.2.0",
+  "scope_id": "example-scope-not-operational",
+  "status": "illustrative",
+  "issued_by": "example-only",
+  "valid_from": "2026-10-18T00:00:00Z",
+  "valid_until": "2026-10-18T00:02:00Z",
+  "environment_kind": "local_replay",
+  "resource_targets": [
+    {
+      "target_id": "fixture-fielddesk",
+      "locator": "fixture:fielddesk",
+      "identity_ref": "synthetic:tenant-a",
+      "allowed_actions": [
+        "read_ticket"
+      ]
+    }
+  ],
+  "allowed_destinations": [
+    "fixture:fielddesk"
+  ],
+  "forbidden_resources": [
+    "all_nonfixture_resources"
+  ],
+  "budget_ref": "manifest.json#/budgets",
+  "stop_control_ref": "example-only",
+  "recovery_plan_ref": "example-only",
+  "provider_policy_review": {
+    "status": "not_applicable",
+    "reference": null,
+    "decision_ref": null
+  },
+  "scope_version": "example-only",
+  "allowed_tracks": [
+    "pentest_with_agents"
+  ],
+  "allowed_attacker_modes": [
+    "scripted"
+  ],
+  "control_assumptions_ref": "example-only",
+  "effect_limit": "No execution: fixture illustration only.",
+  "action_limits": {
+    "max_tool_calls": 0,
+    "max_requests_per_second": 1,
+    "max_concurrent_actions": 1
+  }
+}

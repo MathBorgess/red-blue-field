@@ -7,11 +7,13 @@ Estado: contrato proposto. Os schemas deste repositório definem formatos de rev
 Cada execução deverá gerar:
 
 - `manifest.json`: versões de código/modelo/política/cenário, fixture, seed, parâmetros, orçamento e checksums dos artefatos.
+- `scope.json`: contrato de recursos, identidades, ações, destinos, validade, limites, interrupção e recuperação; hash fixado no manifesto.
 - `events.jsonl`: eventos do controlador, red, assistente alvo, políticas, ferramentas, blue, revisão e avaliador, correlacionados por IDs.
 - `episodes.jsonl`: rótulos, resultados, custo, utilidade, término e referências de evidência.
 - Snapshots inicial/final ou deltas verificáveis da aplicação e ledger do sink.
 - Artefatos retornados pelo provedor e ferramentas, com proveniência e versão da transformação de publicação.
 - `report.json` e uma síntese legível com denominadores, casos e limitações.
+- Em auditoria white box, `coverage-ledger.json` e `findings.jsonl`, ligados à revisão auditada e às provas runtime disponíveis.
 
 Um episódio com coleta incompleta não será descartado silenciosamente. O controlador preserva o que existe, registra uma falha por canal de supervisão e encerra antes de novas ações com efeito. Se um efeito já puder ter ocorrido, seu resultado fica desconhecido até reconciliação com a aplicação.
 
@@ -49,9 +51,21 @@ O armazenamento bruto permanece fora do Git. `datasets/releases/<version>/` pode
 
 ## Estados e rótulos
 
-`record_kind` separa `illustrative`, `fixture_replay` e `model_run`. Um ensaio com um modelo local e um com API remota informam esse detalhe no manifesto. `outcome` distingue `attacker_success`, `blocked`, `no_effect`, `unknown` e `not_executed`.
+`record_kind` separa `illustrative`, `fixture_replay`, `tool_run` e `model_run`. `tool_run` identifica execução real manual/script sem modelo; replay não recebe esse rótulo. Um ensaio com um modelo local e um com API remota informam esse detalhe no manifesto. `outcome` distingue `attacker_success`, `blocked`, `no_effect`, `unknown` e `not_executed`.
 
 `termination_reason` distingue conclusão, recusa do modelo, limite de recursos, decisão humana, interrupção do controlador, erro de infraestrutura e exemplo. Um ataque malsucedido pode ser válido; um episódio inválido não vira defesa bem-sucedida. Resultado adversarial, conclusão da tarefa legítima e qualidade da evidência são campos independentes.
+
+`study_context` informa frente, ambiente efetivo, modo ofensivo, acesso black/gray/white box, variante de guardrail e versão da contenção externa. Manifesto e episódios devem concordar; uma campanha com dimensões diferentes produz manifestos separados. `effect_assessment` separa desvio comportamental, comprometimento de serviço e drift cloud. Seu `proof_status` exige referência de prova para sucesso confirmado. `blocking_layer` informa o bloqueio decisivo; outras decisões da cadeia permanecem nos eventos. Recuperação não apaga uma exposição anterior.
+
+Comandos de runner geram artefatos com ferramenta/versão, script ou comando e hash, destino resolvido, timeout, stdout/stderr limitado e código de término. Logs de processo/banco e auditoria cloud precisam confirmar o efeito. Em cloud, registrar identidade, conta/região e recurso no armazenamento restrito; exportar aliases consistentes em vez de credenciais ou identificadores sensíveis. Não pressupor eventos de dados habilitados por padrão.
+
+## Contratos 0.2 e validação de achados
+
+O diretório [schemas](../schemas) contém oito contratos: evento, episódio, manifesto, catálogo, contexto do estudo, escopo, achado e cobertura. A revisão 0.1 permanece no histórico Git; não há execução medida a migrar. O exemplo foi atualizado mantendo todos os resultados não executados.
+
+O método de [auditoria inspirado na Cloudflare](reference-blueprints.md) distingue candidatos no ledger de achados independentemente verificados. `confirmed` requer prova runtime, limite de confiança atravessado, severidade e remediação proposta; reteste pode permanecer pendente, visível como tal. `needs_validation` exige condição decisiva pendente e plano específico, sem severidade. `rejected` conserva razão e evidência da refutação. Um candidato não verificado não entra no arquivo de achados.
+
+Os schemas verificam formato, não autenticidade nem verdade do achado. O validador semântico da implementação deverá conferir finder/verifier distintos, referências existentes, commit auditado, evidência de unidades marcadas `checked`, validade temporal do escopo e concordância dos contextos. Uma auditoria `complete` não aceita unidades pendentes; unidade `checked` pode conter um achado confirmado, pois cobertura não significa ausência de falha. O coletor deve verificar os bytes dos artefatos antes de promovê-los ao corpus canônico.
 
 ## Reprodução
 

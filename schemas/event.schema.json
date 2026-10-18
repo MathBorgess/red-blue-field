@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "title": "red-blue-field event envelope, draft 0.1.0",
+  "title": "red-blue-field event envelope, draft 0.2.0",
   "required": [
     "schema_version",
     "record_kind",
@@ -25,12 +25,13 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.1.0"
+      "const": "0.2.0"
     },
     "record_kind": {
       "enum": [
         "illustrative",
         "fixture_replay",
+        "tool_run",
         "model_run"
       ]
     },
@@ -87,7 +88,9 @@
         "tool",
         "reviewer",
         "collector",
-        "evaluator"
+        "evaluator",
+        "auditor",
+        "verifier"
       ]
     },
     "event_type": {
@@ -109,7 +112,13 @@
         "evaluator.verdict",
         "collector.error",
         "episode.finished",
-        "run.finished"
+        "run.finished",
+        "plan.revised",
+        "finding.proposed",
+        "finding.verified",
+        "coverage.updated",
+        "cloud.observed",
+        "runner.command"
       ]
     },
     "visibility": {

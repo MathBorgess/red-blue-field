@@ -1,35 +1,47 @@
-# Trilha de estudo e entregas
+# Trilha de aprendizado prático
 
-Plano proposto para sessões práticas. A duração e os modelos serão definidos depois do primeiro piloto; nenhum custo de API foi autorizado ou incorrido por esta documentação.
+O objetivo é dominar o mecanismo e demonstrar capacidade de avaliação. Cada módulo produz explicação própria, reprodução, prova do efeito, defesa e reteste. Um resultado negativo bem fundamentado também encerra um estudo.
 
-| Etapa | Pergunta de aprendizado | Exercício e evidência para encerrar |
+| Módulo | Construir e estudar | Exercício e evidência |
 | --- | --- | --- |
-| 1. Fronteiras de confiança | Quem autentica, autoriza, executa e verifica? | Desenhar o FieldDesk e acompanhar uma operação legítima até o banco. Explicar a diferença entre intenção e permissão. |
-| 2. Falha clássica | Como uma leitura de outro tenant acontece sem depender de IA? | S01 com requisições fixas, correção no servidor e trace de sucesso/falha. Conferir acesso indevido e tarefa legítima. |
-| 3. Falha agêntica | Como dados recuperados passam a influenciar ações? | S02 e S03, primeiro com adaptadores de replay e depois com modelo. Identificar a fronteira atravessada usando eventos. |
-| 4. Defesa e resposta | O que o blue acrescenta à política determinística? | Comparação B/C com os mesmos casos e orçamento; medir detecção, contenção e falso bloqueio. |
-| 5. Supervisão humana | O revisor tem contexto e poder para impedir o efeito? | S04 com revisor simulado para testar o protocolo; ensaio humano posterior separado. Demonstrar invalidação de ação alterada após aprovação. |
-| 6. Recuperação e custo | O que se restaura, o que permanece e quanto custa? | Incidente local com snapshots e sink; medir restauração do serviço e exposição residual. Somar defesa, retries e espera humana. |
-| 7. Generalização | A defesa funciona em variantes novas? | Avaliação congelada em famílias reservadas, relatório por cenário e export sintético com data card. |
+| 1. Agentes por dentro | Laço pequeno, ferramentas, identidade, memória, erro e interrupção. | Explicar e executar uma tarefa legítima do FieldDesk sem esconder o fluxo em framework. |
+| 2. Segurança básica | HTTP, API, autenticação, autorização, banco e rede. | Desenhar fronteiras e reproduzir S01 manualmente com logs do alvo. |
+| 3. Pentest com agente | Inventário, hipóteses, seleção de ferramenta e prova. | Comparar manual/script/agente em S11–S12; confirmar marcador no dado/processo e corrigir. |
+| 3b. Auditoria e verificação | Código, cobertura, fronteiras e achados; método da Cloudflare. | Rastrear uma falha real, rejeitar um falso positivo e registrar uma validação bloqueada; corrigir e retestar. |
+| 4. Objetivo e ferramentas | Prompt injection direto/indireto, composição e metadados. | S02–S03; separar desvio do modelo de efeito bloqueado pela aplicação. |
+| 5. Memória e autonomia | Sessões, persistência, delegação, orçamento e revogação. | S05–S09; medir influência posterior, loops e resposta correta a tarefa impossível. |
+| 6. Defesa e supervisão | Blue, origem de sinais, contenção e aprovação atômica. | B/C e C/D; S04; verificar proteção sem bloquear toda tarefa legítima. |
+| 7. Frameworks e benchmarks | Adaptador CrewAI; Radar, AgentDojo e Agent-SafetyBench. | Comparar o mesmo caso com o agente simples e o framework; explicar a cobertura efetiva de cada ferramenta. |
+| 8. Cloud security | IAM, rede, armazenamento, telemetria e infraestrutura como código. | S13–S15 em sandbox; comparar permissões pretendidas e efetivas, restaurar e verificar teardown. |
+| 9. Cadeias híbridas | Falha de serviço altera agente; agente altera serviço/cloud. | S16–S18, com prova de cada transição e contenção blue. |
+| 10. Método experimental | Ablação, pareamento, famílias reservadas e custo. | Publicar release por frente e ambiente, com falhas e denominadores. |
+| 11. Portfólio | Relato técnico com artefatos auditáveis. | Produzir de cinco a dez estudos a partir de execuções; plano inicial com oito temas. |
 
-## Sequência de implementação a avaliar
+A fase cloud começa depois de conta, recursos, política e orçamento definidos. O ambiente local permite aprender e produzir evidência antes desse investimento.
 
-1. Contratos, fixture e executor sem LLM: estado, cenários, coletor e oráculos.
-2. Uma fatia completa de S01, da tentativa ao dataset, incluindo controle benigno e falha de coleta.
-3. Broker/adaptadores de modelo e S02, preservando a mesma avaliação por efeitos.
-4. Registro de ferramentas e S03; detector determinístico antes de adicionar o blue.
-5. Blue separado, view limitada e respostas reversíveis; comparar B/C.
-6. Revisão vinculada e S04; validar atomicidade, idempotência e versões.
-7. Piloto, variantes reservadas, relatório e revisão dos cenários de expansão.
+Construir o planejador/runner inspirado no [PentAGI](reference-blueprints.md) durante o módulo 3. Comparar a plataforma upstream somente depois de verificar a implementação própria. No módulo 3b, usar a skill da Cloudflare como referência de método, mantendo a verificação de código separada do pentest black box.
 
-Cada fatia deve deixar um comando reproduzível, traces inspecionáveis e a explicação do mecanismo. Não encerrar por uma demonstração visual isolada ou por testes que apenas confirmem a implementação.
+## Sequência de entregas
 
-## Decisões para a revisão do plano
+1. Fundação: escopo, fixture, coletor e primeiro episódio completo S01.
+2. Duas frentes em paralelo lógico: agente red/alvo para S02 e pentest de serviço local para S11–S12.
+3. S03, memória, autonomia, blue e revisão, com controles benignos.
+4. Adaptador CrewAI e comparações de ferramentas; congelar o primeiro conjunto local reservado.
+5. Campanha local e primeira release; preparar cloud sem pressupor equivalência da emulação.
+6. S13–S15 cloud e S16–S18 híbridos; releases incrementais.
+7. Estudos técnicos com links para runs, causas, correções e limitações.
 
-- Adequação do FieldDesk e dos quatro cenários iniciais.
-- Uso de um único contrato de execução de episódio como fronteira principal dos testes.
-- Provedor, modelo e orçamento total antes de chamadas reais.
-- Primeira avaliação humana: quais decisões observar e como separar esse grupo do revisor simulado.
-- Quando publicar os casos reservados e como renovar o conjunto para avaliações futuras.
+A sequência é um plano de implementação; não é registro de execução nem agendamento.
 
-Recomendação inicial: começar sem custo de modelo, validar uma fatia ponta a ponta e só então dimensionar a campanha com LLM. Treinamento, destilação e autoalteração dos agentes ficam para um estudo posterior, depois de existir uma régua estável.
+## Como demonstrar domínio
+
+Para cada módulo, o estudante deve conseguir:
+
+- Explicar identidade, entrada, estado e fronteira atravessada.
+- Distinguir a hipótese, o que observou e o que permanece desconhecido.
+- Reproduzir a prova sem depender de uma narrativa do agente.
+- Corrigir a causa, retestar e mostrar que a tarefa legítima continua funcionando.
+- Explicar por que uma defesa falhou e qual outra camada conteve o efeito.
+- Adaptar o experimento a uma variante nova sem alterar o oráculo para fazê-la passar.
+
+A previsão de mercado apresentada é motivação para a trilha. As entregas medem competência e resultados do laboratório, não demanda futura por vagas.

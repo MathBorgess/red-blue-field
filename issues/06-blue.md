@@ -25,3 +25,9 @@ Investigar alertas e contexto permitido. Respostas possíveis: revogar sessão d
 Usar incidentes e controles benignos pareados. Distinguir prevenção antes do efeito de contenção posterior. Conferir revogação ou quarentena no componente que aplica a medida, sem aceitar apenas a frase do agente.
 
 Referências: [fronteiras](https://github.com/MathBorgess/red-blue-field/blob/main/docs/architecture.md), [métricas](https://github.com/MathBorgess/red-blue-field/blob/main/docs/experiment-design.md).
+
+## Revisão 0.2
+
+Aplicar os contratos de contexto/efeitos 0.2 e manter o controle sob teste separado da contenção externa. Guardrail do modelo, autorização da ferramenta e autorização do serviço têm resultados separados.
+
+A adaptação cloud depende da etapa específica de recursos e telemetria; não bloqueia a primeira comparação local. O blue é distinto do verificador de achados e do avaliador de efeitos. Preservar drift e exposição anterior mesmo após recuperação.

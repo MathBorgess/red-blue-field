@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "independently verified finding — draft 0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "finding_id",
+    "run_id",
+    "source_revision",
+    "status",
+    "title",
+    "finder_id",
+    "verifier_id",
+    "independent_verification_ref",
+    "trust_boundary",
+    "trace_refs",
+    "runtime_evidence_refs",
+    "severity",
+    "decisive_unknown",
+    "validation_plan",
+    "rejection_reason",
+    "remediation_ref",
+    "retest_ref"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.2.0"
+    },
+    "finding_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "status": {
+      "enum": [
+        "confirmed",
+        "needs_validation",
+        "rejected"
+      ]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "finder_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verifier_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "independent_verification_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trust_boundary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "trace_refs": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "runtime_evidence_refs": {
+      "type": "array",
+      "minItems": 0,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "severity": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical",
+        null
+      ]
+    },
+    "decisive_unknown": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "validation_plan": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rejection_reason": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "remediation_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retest_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "confirmed"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "runtime_evidence_refs": {
+            "minItems": 1
+          },
+          "severity": {
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "decisive_unknown": {
+            "type": "null"
+          },
+          "rejection_reason": {
+            "type": "null"
+          },
+          "remediation_ref": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "needs_validation"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "severity": {
+            "type": "null"
+          },
+          "decisive_unknown": {
+            "type": "string",
+            "minLength": 1
+          },
+          "validation_plan": {
+            "type": "string",
+            "minLength": 1
+          },
+          "rejection_reason": {
+            "type": "null"
+          },
+          "remediation_ref": {
+            "type": "null"
+          },
+          "retest_ref": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "rejected"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "severity": {
+            "type": "null"
+          },
+          "rejection_reason": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  ]
+}

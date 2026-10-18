@@ -22,3 +22,11 @@
 | Tool poisoning | Instruções adversariais em metadados ou descrições de ferramentas. |
 | BOLA / IDOR | Acesso a um objeto sem a autorização exigida, frequentemente por alteração de seu identificador. |
 | Estado da evidência | Observado, demonstrado, relatado por fornecedor, hipotético ou não executado. |
+| Pentest com agentes | Uso de agente para investigar e confirmar falhas em serviços; o alvo pode funcionar sem IA. |
+| Agentic red teaming | Avaliação adversarial de objetivos, decisões, ferramentas, memória e autonomia de um agente. |
+| Cadeia híbrida | Falha de serviço e influência sobre agente compõem um caminho com cada transição comprovada. |
+| Agência / autonomia | Capacidades de agir concedidas / independência para decidir como e quando agir. |
+| Black / gray / white box | Acesso externo / informação parcial / código e arquitetura autorizados; condições de estudo diferentes. |
+| Desvio / comprometimento / drift | Comportamento fora da tarefa / efeito indevido confirmado no serviço / mudança de configuração observada. |
+| Verificador de achados | Papel distinto do descobridor que reconstrói a alegação e confere evidências; diferente de blue e aprovador. |
+| Ledger de cobertura | Registro de unidades e verificações por revisão; ausência de achados não comprova cobertura total. |

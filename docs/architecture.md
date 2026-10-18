@@ -1,69 +1,86 @@
-# Arquitetura proposta
+# Arquitetura de referência proposta
 
-Estado: proposta para avaliação. Os componentes abaixo ainda não existem como serviços executáveis.
+Revisão 0.2; componentes ainda não implementados. O desenho cobre pentest com agentes, agentic red teaming e cadeias híbridas.
 
-## Um produto pequeno e dois agentes de laboratório
+## Componentes
 
-O **FieldDesk** reúne tickets, documentos, pedidos e reembolsos simulados de dois tenants. Cada identidade tem papel e escopo próprios. Um assistente de produto converte pedidos em propostas de chamadas a ferramentas. O servidor aplica as regras de negócio e mantém os efeitos locais.
+| Componente | Responsabilidade | Fronteira |
+| --- | --- | --- |
+| Plano de controle | Provisionar, emitir escopo, iniciar, interromper, restaurar e destruir. | Identidade separada; não é ferramenta dos participantes. |
+| Arena FieldDesk | Aplicação e assistente interno; APIs, banco, memória, políticas e integrações. | Alvos próprios com falhas intencionais e versões protegidas. |
+| Worker red | Inventariar, escolher hipóteses, executar ferramentas e confirmar achados. | Modo manual, script ou agente, com as mesmas capacidades contratadas. |
+| Runner de execução | Executar sondas e scripts em VM/microVM descartável. | Sem acesso ao host; rede e destinos do episódio aplicados externamente. |
+| Broker de modelo | Oferecer inferência e medir uso. | Chave fora do contexto dos agentes; não funciona como proxy genérico. |
+| Gateway de ferramentas | Autenticar chamada, registrar proposta e executar capacidade. | Política interna sob teste separada da validação externa de escopo. |
+| Adaptador cloud | Usar identidade temporária e recursos do sandbox. | Autoriza ações por serviço/recurso; não expõe credencial ao modelo. |
+| Blue team | Investigar sinais e aplicar contenção/recuperação previstas. | Sem acesso ao plano red, casos reservados ou escrita em oráculos. |
+| Revisão humana | Decidir sobre uma operação exata. | Identidade e canal próprios; revisor simulado rotulado separadamente. |
+| Coletor e avaliador | Receber telemetria, conferir estado e classificar efeitos. | Fora da área gravável por red, alvo e blue. |
+| Auditor e verificador de achados | Inventariar código, registrar cobertura e validar candidatos. | Identidades/contextos distintos; sem alterar alvo, escopo ou evidência canônica. |
 
-O **red team** escolhe entradas e ações adversariais nas superfícies permitidas. O **blue team** investiga sinais, sugere medidas e executa apenas respostas previamente autorizadas pelo perfil do experimento. O assistente de produto pertence à aplicação alvo; ele não é o agente blue.
+## Fluxo
 
 ```mermaid
 flowchart LR
-    R[Agente red] --> G[Gateway de ações]
-    U[Tarefa legítima] --> A[FieldDesk e assistente de produto]
-    G --> A
-    A --> P[Executor de política e ferramentas]
-    H[Revisor humano ou simulado identificado] --> P
-    P --> D[(Banco sintético e sink local)]
-    A --> O[Coletor fora dos agentes]
-    G --> O
-    P --> O
-    O --> B[Agente blue]
-    B --> C[Resposta limitada por política]
-    C --> P
-    D --> E[Avaliador independente]
-    O --> E
-    E --> X[Dataset e relatório]
-    K[Controlador de escopo e orçamento] -. governa .-> G
-    K -. governa .-> P
-    K -. interrupção .-> C
+  M[Pessoa ou script de referência] --> W[Worker ofensivo]
+  R[Agente red] --> W
+  W --> G[Gateway e escopo]
+  G --> V[API e banco vulneráveis]
+  G --> A[Agente interno FieldDesk]
+  A --> T[Ferramentas e política sob teste]
+  T --> C[Recursos cloud do sandbox]
+  G --> C
+  V --> O[Coletor independente]
+  A --> O
+  T --> O
+  C --> O
+  O --> B[Agente blue]
+  B --> Q[Resposta limitada]
+  Q --> V
+  Q --> T
+  Q --> C
+  O --> E[Avaliador por efeitos]
+  K[Plano de controle externo] -. escopo e interrupção .-> G
+  K -. ciclo de vida .-> V
+  K -. ciclo de vida .-> C
+  E --> D[Dataset, relatório e estudo]
 ```
 
-## Responsabilidades e fronteiras
+## Dois planos de controle distintos
 
-| Componente | Faz | Permissões e informações |
-| --- | --- | --- |
-| FieldDesk | Atende tarefas legítimas; guarda tickets, pedidos e documentos; registra mudanças. | Identidade por tenant. O perfil vulnerável altera controles da aplicação, preservando o isolamento externo. |
-| Assistente de produto | Interpreta a solicitação e propõe ferramentas. | Contexto mínimo da tarefa. Sem shell, token de administração ou acesso ao host. |
-| Red team | Propõe variantes e encadeia tentativas dentro do cenário. | APIs locais e pontos de injeção enumerados. Sem escrita nos oráculos ou no coletor. |
-| Blue team | Detecta, investiga e recomenda contenção; pode aplicar respostas de baixo alcance previstas no perfil. | View filtrada da telemetria; não recebe intenção red, canary reservado nem rótulo do avaliador. |
-| Executor de política | Valida identidade, objeto, ação, parâmetros, classificação de dados e aprovação. | Aplica a decisão fora do LLM, em toda chamada. Atualizações de política ficam congeladas durante a comparação. |
-| Controlador | Inicializa estado, estabelece prazos e limites e encerra o episódio. | Único dono do ciclo de vida e do mecanismo de interrupção. Os agentes não podem desativá-lo. |
-| Coletor | Registra chamadas, decisões, efeitos e falhas de coleta. | Armazenamento fora das áreas graváveis pelos agentes. Falha de evidência impede nova ação com efeito. |
-| Avaliador | Lê estado completo e ledger para produzir rótulos e referências de evidência. | Independente das mensagens red/blue; não oferece feedback reservado durante a avaliação final. |
-| Revisão humana | Decide sobre uma ação proposta e inspeciona evidências. | Interface separada das mensagens dos agentes. O caso simulado não é contado como participação humana real. |
+O produto alvo pode ter filtro de conteúdo, prompt de política, autorização de API e permissões IAM intencionalmente vulneráveis. Esses são objetos da avaliação. O plano externo controla o conjunto de máquinas, contas, recursos, destinos e tempo em que o experimento pode produzir efeitos.
 
-## Isolamento e execução
+O controle externo não verifica a resposta correta nem corrige previamente a vulnerabilidade plantada. Ele limita o alcance da ação. Se bloquear uma tentativa antes da camada estudada, o resultado é registrado como bloqueio externo; não há evidência de resistência da camada interna.
 
-No primeiro marco, usar adaptadores determinísticos, sem chamadas a modelos nem rede externa. Na etapa com LLM, somente um broker dedicado terá acesso ao provedor. O broker mantém a credencial fora do contexto e das ferramentas dos participantes e aceita operações de inferência específicas, sem funcionar como proxy HTTP genérico.
+## Ambientes
 
-Os workers do laboratório terão rede interna limitada, volumes próprios, usuário sem privilégios, limites de CPU/memória/tempo e nenhuma montagem de socket Docker, diretório pessoal ou credencial do host. Imagens e dependências serão preparadas antes do episódio. O gateway aceita identificadores de recursos do cenário, não destinos arbitrários.
+| Valor | Execução e conclusão permitida |
+| --- | --- |
+| local_replay | Respostas/estados de fixture; valida harness e contratos. |
+| local_live | API, banco e processos executáveis próprios; prova de efeito local. |
+| cloud_emulated | Serviços/estado emulados; valida adaptadores e hipóteses. |
+| cloud_live | Recursos efêmeros reais; prova limitada ao serviço, versão e conta avaliados. |
 
-O perfil sem defesa continua com essas mesmas restrições. O teste de isolamento tentará alcançar um serviço sentinela controlado, externo à rede do worker e interno à infraestrutura do ensaio. Não dependerá de uma tentativa contra um endereço de terceiros para comprovar o bloqueio.
+Cloud emulada e replay não são provas de invasão da AWS. Compartilhar um modelo entre duas rodadas também não garante respostas idênticas.
 
-Não oferecer execução arbitrária de código no MVP. Uma futura fase que a exija precisará de desenho próprio de isolamento, com VM ou microVM e testes específicos; containers compartilhando kernel não constituem garantia de isolamento contra código hostil.
+## Shell, serviços e cloud
 
-## Controle de efeitos e de aprovações
+A fundação começa com ferramentas específicas, sem shell. A etapa de pentest local acrescenta VM/microVM e execução auditada: ferramenta/versão, script ou comando, hash, saída, código de término, destino e efeito. A prova de execução é um marcador inofensivo no alvo; não há necessidade de persistência ou de acesso ao kernel/host.
 
-Uma ferramenta de leitura, uma publicação no sink e uma proposta de reembolso são operações distintas. O executor recebe a identidade autenticada do transporte; nunca aceita `tenant_id`, papel ou “aprovação” fornecidos pelo modelo como prova de autoridade.
+As VMs recebem apenas o que o contrato permite. O caminho de rede não aceita um destino arbitrário só porque um modelo o descreveu como parte do laboratório. Revalidar resolução, redirects e destinos no momento da ação.
 
-Uma aprovação será vinculada a `actor_id`, `action`, parâmetros canônicos, `resource_version`, `policy_version`, prazo e nonce de uso único. Verificação e consumo ocorrerão na mesma transação do efeito, com idempotência. Alteração de valor, destinatário, versão ou escopo invalida a decisão. Nenhum segredo de assinatura aparece no trace.
+O adaptador cloud consulta a identidade efetiva e restringe região e recursos. O provisionador não entrega seu próprio privilégio ao red. Permissões, boundary e condições são testadas por ação; nomes e tags não são uma fronteira universal. Coleta e interrupção não ficam sob controle da política vulnerável do alvo.
 
-O blue poderá revogar uma sessão de teste, suspender uma ferramenta ou colocar um documento em quarentena. Exclusão de dados, ampliação de permissão e alteração de política exigirão proposta separada. Recuperação por snapshot será aplicada apenas ao estado do episódio e terá perdas residuais medidas; desfazer o banco não significa desfazer uma exposição já registrada no sink.
+## Aprovação e resposta
 
-## Stack candidata e decisões adiadas
+Aprovação vincula identidade, operação, parâmetros canônicos, versão do recurso/política, prazo e nonce de uso único. Verificação, consumo e efeito são atômicos e idempotentes.
 
-Começar com Python, FastAPI, SQLite e eventos JSONL; usar OpenTelemetry com coletor e visualização local como Jaeger. Adaptadores de modelo ficam atrás de uma interface única. Não é necessário adotar um framework multiagente para validar o primeiro cenário.
+Blue pode suspender sessão, ferramenta, documento ou processo de teste e restaurar recursos previstos. Uma mudança de política como defesa é congelada antes da próxima comparação. Ações de restauração e teardown pertencem a um papel próprio; acesso de investigação não concede administração geral.
 
-Essas escolhas são recomendações, não decisões já aprovadas. Fixar versões no lockfile e a revisão das convenções GenAI durante a implementação. Framework de agentes, provedor/modelos, hardware e ferramenta de visualização poderão mudar sem alterar os contratos de evidência.
+## Implementação incremental
+
+O [blueprint PentAGI/Cloudflare](reference-blueprints.md) orienta a trilha objetivo→hipótese→ação e o fluxo de cobertura→candidato→verificação→relatório. O modo white box recebe uma cópia de código da revisão autorizada; testes black box não recebem esse benefício. O verificador não herda acesso administrativo ao alvo por exercer essa função.
+
+Python e um serviço HTTP pequeno são candidatos para a fundação, com banco transacional e eventos JSONL/OTel. Primeiro implementar um laço de agente compreensível; depois comparar um adaptador CrewAI. Na etapa gerenciada, avaliar AgentCore e interfaces suportadas na data, mantendo os contratos do laboratório.
+
+[Escopo](lab-scope.md), [cloud](cloud-lab.md) e [ferramentas](tooling-and-references.md) detalham os contratos. São decisões de desenho para implementação futura.

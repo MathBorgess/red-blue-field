@@ -45,6 +45,9 @@ Essas escolhas se apoiam nas recomendações de [agência excessiva da OWASP](ht
 
 ## Referências de avaliação
 
+- [PentAGI](https://github.com/vxcontrol/pentagi) e [Cloudflare security-audit-skill](https://github.com/cloudflare/security-audit-skill): referências solicitadas para construção. O [blueprint](reference-blueprints.md) transforma planejamento/runner/memória e cobertura/verificação em entregas e provas do nosso projeto; não afirma integração ou eficácia já medidas.
+- [OWASP WSTG](https://owasp.org/www-project-web-security-testing-guide/) e [API Security 2023](https://owasp.org/API-Security/editions/2023/en/0x11-t10/): base para a frente tradicional, complementando os riscos de agentes.
+- [AWS Agentic AI Security Scoping Matrix](https://aws.amazon.com/blogs/security/the-agentic-ai-security-scoping-matrix-a-framework-for-securing-autonomous-ai-systems/): análise de agência e autonomia; não equivale à lista de riscos OWASP nem aos perfis experimentais de defesa.
 - [AgentDojo](https://arxiv.org/abs/2406.13352v3): referência para tarefas legítimas, objetivos adversariais e avaliação de ataques contra agentes que usam ferramentas. Inspirar o protocolo; não apresentar nosso conjunto como equivalente ao benchmark.
 - [OWASP Top 10 for Agentic Applications 2026](https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/): vocabulário para riscos de objetivos, ferramentas, identidade, supply chain, memória, comunicação, cascatas e confiança humana. Os mapeamentos do catálogo são interpretativos.
 - [MITRE ATLAS](https://atlas.mitre.org/): taxonomia viva para organizar técnicas e mitigações. Fixar uma revisão antes de adicionar identificadores aos dados publicados.
@@ -53,7 +56,7 @@ Essas escolhas se apoiam nas recomendações de [agência excessiva da OWASP](ht
 
 ## Conclusões de trabalho
 
-O conjunto de fontes sustenta estudar duas direções: agentes como ferramentas de um atacante e agentes/aplicações como alvo. A segunda não se reduz a jailbreak: permissões, dados recuperados, ferramentas e saídas também definem o impacto.
+O conjunto de fontes sustenta estudar agentes como ferramentas de um atacante, agentes/aplicações como alvo e as cadeias entre serviços, comportamento e cloud. A avaliação não se reduz a jailbreak: permissões, dados recuperados, ferramentas e saídas também definem o impacto. As novas referências arquiteturais e de método estão identificadas separadamente dos relatos de incidentes no índice de 32 fontes.
 
 Supervisão precisa produzir uma decisão aplicável e um registro verificável. Um texto dizendo “o humano aprovou” não prova autorização; uma mensagem dizendo “bloqueei” não prova contenção. O protocolo deverá conferir cada alegação no componente que executa o efeito.
 

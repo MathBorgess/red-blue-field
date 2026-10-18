@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "study context — draft 0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "track",
+    "environment_kind",
+    "attacker_mode",
+    "access_model",
+    "guardrail_variant",
+    "outer_boundary_version"
+  ],
+  "properties": {
+    "track": {
+      "enum": [
+        "pentest_with_agents",
+        "agentic_red_team",
+        "hybrid"
+      ]
+    },
+    "environment_kind": {
+      "enum": [
+        "local_replay",
+        "local_live",
+        "cloud_emulated",
+        "cloud_live"
+      ]
+    },
+    "attacker_mode": {
+      "enum": [
+        "manual",
+        "scripted",
+        "agent_assisted",
+        "bounded_autonomous"
+      ]
+    },
+    "access_model": {
+      "enum": [
+        "black_box",
+        "gray_box",
+        "white_box"
+      ]
+    },
+    "guardrail_variant": {
+      "type": "string",
+      "minLength": 1
+    },
+    "outer_boundary_version": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

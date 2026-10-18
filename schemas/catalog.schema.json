@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "type": "object",
   "additionalProperties": false,
-  "title": "red-blue-field scenario catalog, draft 0.1.0",
+  "title": "red-blue-field scenario catalog, draft 0.2.0",
   "required": [
     "schema_version",
     "status",
@@ -12,7 +12,7 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.1.0"
+      "const": "0.2.0"
     },
     "status": {
       "const": "proposed_not_executed"
@@ -50,7 +50,12 @@
           "benign_control",
           "environment",
           "terminal_conditions",
-          "budget_status"
+          "budget_status",
+          "track",
+          "environment_kinds",
+          "owasp_api_2023_ids",
+          "mapping_rationale",
+          "guardrail_layers"
         ],
         "properties": {
           "id": {
@@ -67,8 +72,12 @@
           },
           "phase": {
             "enum": [
-              "mvp",
-              "expansion"
+              "foundation",
+              "agentic_core",
+              "local_pentest",
+              "cloud",
+              "hybrid",
+              "optional_research"
             ]
           },
           "source_ids": {
@@ -82,7 +91,7 @@
           },
           "owasp_agentic_ids": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 0,
             "uniqueItems": true,
             "items": {
               "type": "string",
@@ -148,6 +157,48 @@
           },
           "budget_status": {
             "const": "to_be_frozen_before_execution"
+          },
+          "track": {
+            "enum": [
+              "pentest_with_agents",
+              "agentic_red_team",
+              "hybrid"
+            ]
+          },
+          "environment_kinds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "enum": [
+                "local_replay",
+                "local_live",
+                "cloud_emulated",
+                "cloud_live"
+              ]
+            }
+          },
+          "owasp_api_2023_ids": {
+            "type": "array",
+            "minItems": 0,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "pattern": "^API([1-9]|10):2023$"
+            }
+          },
+          "mapping_rationale": {
+            "type": "string",
+            "minLength": 1
+          },
+          "guardrail_layers": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
       }

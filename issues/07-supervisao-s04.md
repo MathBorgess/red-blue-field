@@ -22,3 +22,7 @@ Dependências: [RB-003 / #3](https://github.com/MathBorgess/red-blue-field/issue
 Testar externamente os efeitos do episódio. Acrescentar teste menor para corrida no consumo e idempotência, além de alteração de valor, destinatário e versão depois do aceite. Dimensionar participação humana em estudo separado, sem atribuir desempenho humano ao revisor simulado.
 
 Referências: [aprovação e recuperação](https://github.com/MathBorgess/red-blue-field/blob/main/docs/architecture.md), [S04](https://github.com/MathBorgess/red-blue-field/blob/main/docs/scenarios.md).
+
+## Revisão 0.2
+
+Aplicar os contratos de contexto/efeitos 0.2 e manter o controle sob teste separado da contenção externa. Guardrail do modelo, autorização da ferramenta e autorização do serviço têm resultados separados.

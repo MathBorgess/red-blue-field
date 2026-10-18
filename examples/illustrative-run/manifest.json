@@ -1,11 +1,11 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "record_kind": "illustrative",
   "run_id": "example-run-0001",
   "status": "not_executed",
   "created_at": "2026-10-18T00:00:00Z",
   "code_commit": "not_applicable",
-  "scenario_version": "0.1.0-draft",
+  "scenario_version": "0.2.0-draft",
   "policy_version": "example-only",
   "fixture_id": "example-only",
   "fixture_hash": null,
@@ -23,19 +23,34 @@
   "artifacts": [
     {
       "path": "events.jsonl",
-      "sha256": "5656249a3565f7eeb8aa8cfaf7a67f0e7ccbc9289bc02f47d0800ecfe4729c1c",
+      "sha256": "0869947f0e4453ac38250ddbb9b8bd2b08eaddb7a6271b08e61b9f21613f7144",
       "kind": "events"
     },
     {
       "path": "episodes.jsonl",
-      "sha256": "c5a6cf4aabe69614d9efc6ef4804562c91e25a00d068b79f87abf3b621742126",
+      "sha256": "ec2b200fb0106f636fb7c31aa17ff84172e9993c473515e28b2adf9f9572e8b2",
       "kind": "episodes"
+    },
+    {
+      "path": "scope.json",
+      "sha256": "c858bc7d685ee964b57d342ade3c64b34cd02635888d5df0277406404c9a9630",
+      "kind": "scope"
     }
   ],
-  "last_event_hash": "177d8b2185a4c23e2c696f3b2f49746dfe9ec005db35561d47e05059d01d4969",
+  "last_event_hash": "686cdc97e74f7ac2660d7fa5fdabca30d068d81f6b8f9893a82698473c7509ef",
   "limitations": [
     "Exemplo estático de formato; nenhuma aplicação ou agente foi executado.",
     "Campos de medição nulos não são medidas de custo ou desempenho.",
     "O encadeamento ilustra divergência verificável, sem autenticação criptográfica de um coletor real."
-  ]
+  ],
+  "study_context": {
+    "track": "pentest_with_agents",
+    "environment_kind": "local_replay",
+    "attacker_mode": "scripted",
+    "access_model": "gray_box",
+    "guardrail_variant": "illustrative_only",
+    "outer_boundary_version": "example_only"
+  },
+  "scope_ref": "scope.json",
+  "scope_sha256": "c858bc7d685ee964b57d342ade3c64b34cd02635888d5df0277406404c9a9630"
 }
