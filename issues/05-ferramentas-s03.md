@@ -4,7 +4,7 @@
 
 Descrições de ferramentas podem carregar instruções adversariais sem uma mudança explícita nas permissões. Executar S03 com um registro local de ferramentas e comparar catálogo aprovado com metadados alterados.
 
-Dependência: RB-004.
+Dependência: [RB-004 / #4](https://github.com/MathBorgess/red-blue-field/issues/4).
 
 ## Critérios de aceitação
 

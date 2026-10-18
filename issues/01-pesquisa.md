@@ -4,7 +4,7 @@
 
 Consolidar a pesquisa pública que fundamenta o laboratório red-blue-field, distinguindo incidentes relatados, demonstrações controladas e cenários hipotéticos.
 
-A pesquisa inicial está concluída na documentação. Esta issue deverá ser encerrada após publicar e conferir os artefatos no repositório.
+A pesquisa inicial foi publicada e conferida no repositório em 18/10/2026. A leitura de retorno confirmou o conteúdo da pesquisa, da spec e do índice de fontes.
 
 ## Evidência
 

@@ -107,6 +107,6 @@ Esta revisão foi sintetizada com a skill [to-spec de Matt Pocock](https://githu
 
 A skill prevê publicar a spec no tracker e aplicar `ready-for-agent`. Em 18/10/2026, o usuário definiu explicitamente GitHub Issues no novo repositório como destino e autorizou publicar a pesquisa e as issues. A especificação continua proposta para avaliação; publicar o backlog não confirma a fronteira de testes nem inicia implementação. A classificação de prontidão deve refletir a revisão do plano.
 
-O repositório público foi criado pelo usuário em 18/10/2026 e sua existência foi confirmada pelo GitHub conectado. Pesquisa, spec e backlog são publicados nesse repositório. A documentação conserva separadas a preparação dos artefatos, a publicação e a execução futura do estudo.
+O repositório público foi criado pelo usuário em 18/10/2026 e sua existência foi confirmada pelo GitHub conectado. Pesquisa, spec e backlog são publicados nesse repositório. A documentação conserva separadas a preparação dos artefatos, a publicação e a execução futura do estudo. A avaliação do plano está na [issue #2](https://github.com/MathBorgess/red-blue-field/issues/2).
 
 Antes da primeira chamada de modelo, definir provedor, modelos, orçamento e tamanho do piloto. Antes de um estudo humano, delimitar participantes, decisões e medições. Até lá, o trabalho concreto desta revisão é pesquisa, cenário e contrato de avaliação, sem experimento executado.

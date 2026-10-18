@@ -4,7 +4,7 @@
 
 Precisamos medir o que um agente defensor acrescenta à política determinística. Implementar o blue como participante separado, com view de telemetria limitada e respostas de contenção previstas no perfil C.
 
-Dependência: RB-004.
+Dependência: [RB-004 / #4](https://github.com/MathBorgess/red-blue-field/issues/4).
 
 ## Escopo
 

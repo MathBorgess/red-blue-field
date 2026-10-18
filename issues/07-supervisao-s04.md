@@ -4,7 +4,7 @@
 
 Uma mensagem de aprovação não garante que a pessoa revisou a ação que será executada. Implementar o fluxo de revisão e S04, vinculando a decisão a uma operação específica de reembolso fictício.
 
-Dependências: RB-003, RB-006.
+Dependências: [RB-003 / #3](https://github.com/MathBorgess/red-blue-field/issues/3), [RB-006 / #6](https://github.com/MathBorgess/red-blue-field/issues/6).
 
 ## Critérios de aceitação
 

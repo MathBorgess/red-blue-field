@@ -4,7 +4,7 @@
 
 O replay determinístico não mede como um modelo escolhe ferramentas ou reage a dados hostis. Integrar os agentes red e alvo por um broker de inferência e executar S02, mantendo os mesmos oráculos por efeito.
 
-Dependência: RB-003.
+Dependência: [RB-003 / #3](https://github.com/MathBorgess/red-blue-field/issues/3).
 
 ## Escopo
 

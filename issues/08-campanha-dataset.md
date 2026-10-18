@@ -4,7 +4,7 @@
 
 Uma demonstração isolada não permite comparar defesa, custo ou utilidade. Executar uma campanha congelada dos quatro cenários do MVP, publicar métricas com denominadores e produzir uma release sintética verificável.
 
-Dependências: RB-005, RB-006, RB-007.
+Dependências: [RB-005 / #5](https://github.com/MathBorgess/red-blue-field/issues/5), [RB-006 / #6](https://github.com/MathBorgess/red-blue-field/issues/6), [RB-007 / #7](https://github.com/MathBorgess/red-blue-field/issues/7).
 
 ## Critérios de aceitação
 

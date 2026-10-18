@@ -21,7 +21,7 @@ Laboratório de estudo de cybersecurity e de defesa de sistemas com agentes de I
 5. [Dataset, traces e publicação](docs/observability.md).
 6. [Trilha de estudo](docs/study-plan.md).
 7. [Vocabulário](GLOSSARY.md) e [fontes primárias](research/sources.json).
-8. [Spec produzida com to-spec, para avaliação](SPEC.md).
+8. [Spec produzida com to-spec, para avaliação](SPEC.md) · [revisão na issue #2](https://github.com/MathBorgess/red-blue-field/issues/2).
 9. [Issues, critérios de aceitação e dependências](issues/README.md).
 
 ## Primeiro recorte proposto

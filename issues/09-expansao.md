@@ -4,7 +4,7 @@
 
 Após o piloto, selecionar quais riscos justificam novos experimentos. Os candidatos S05–S10 cobrem memória, uso indevido de ferramentas, esgotamento de recursos, evidência hostil, limite de escopo e propagação em grafo finito.
 
-Dependência: RB-008.
+Dependência: [RB-008 / #8](https://github.com/MathBorgess/red-blue-field/issues/8).
 
 ## Critérios de aceitação
 

@@ -4,7 +4,7 @@
 
 Ainda não existe uma execução que ligue tentativa adversarial, efeito na aplicação e evidência. Implementar uma fatia completa de S01 com adaptadores determinísticos: inicializar o FieldDesk fictício, tentar acesso entre tenants e produzir dataset e trace verificáveis.
 
-Dependência: RB-002.
+Dependência: [RB-002 / #2](https://github.com/MathBorgess/red-blue-field/issues/2).
 
 ## Escopo
 
