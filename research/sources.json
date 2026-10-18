@@ -1,0 +1,183 @@
+{
+  "schema_version": "0.1.0",
+  "retrieved_on": "2026-10-18",
+  "selection": "Fontes públicas primárias; resumos próprios. Conteúdo privado não é distribuído.",
+  "sources": [
+    {
+      "id": "SRC01",
+      "title": "Breaking down EchoLeak",
+      "publisher": "Aim Security / Cato Networks",
+      "url": "https://www.catonetworks.com/blog/breaking-down-echoleak/",
+      "published_on": null,
+      "evidence_type": "researcher_disclosure",
+      "access_level": "content_accessed",
+      "limitation": "Vulnerabilidade demonstrada; não estabelece exploração disseminada.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC02",
+      "title": "CVE-2025-32711",
+      "publisher": "Microsoft Security Response Center",
+      "url": "https://msrc.microsoft.com/update-guide/vulnerability/CVE-2025-32711",
+      "published_on": null,
+      "evidence_type": "vulnerability_record",
+      "access_level": "metadata_only",
+      "limitation": "Página exige JavaScript; não usar como evidência de exploração observada.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC03",
+      "title": "GitHub MCP Exploited: Accessing private repositories via MCP",
+      "publisher": "Invariant Labs",
+      "url": "https://invariantlabs.ai/blog/mcp-github-vulnerability",
+      "published_on": "2025-05-26",
+      "evidence_type": "controlled_demonstration",
+      "access_level": "content_accessed",
+      "limitation": "Demonstração de pesquisadores com agente e ferramentas autorizadas de forma ampla.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC04",
+      "title": "MCP Security Notification: Tool Poisoning Attacks",
+      "publisher": "Invariant Labs",
+      "url": "https://invariantlabs.ai/blog/mcp-security-notification-tool-poisoning-attacks",
+      "published_on": "2025-04-01",
+      "evidence_type": "controlled_demonstration",
+      "access_level": "content_accessed",
+      "limitation": "Ataque em metadados de ferramenta; não significa que toda implementação MCP seja vulnerável.",
+      "illustrative_scenario_id": "S03"
+    },
+    {
+      "id": "SRC05",
+      "title": "Disrupting the first reported AI-orchestrated cyber espionage campaign",
+      "publisher": "Anthropic",
+      "url": "https://www.anthropic.com/news/disrupting-AI-espionage",
+      "published_on": "2025-11-13",
+      "evidence_type": "vendor_incident_report",
+      "access_level": "content_accessed",
+      "limitation": "Campanha detectada em setembro de 2025; estimativa de autonomia e atribuição pertencem ao fornecedor.",
+      "illustrative_scenario_id": "S06"
+    },
+    {
+      "id": "SRC06",
+      "title": "Detecting and countering misuse of AI: September 2026",
+      "publisher": "Anthropic",
+      "url": "https://www.anthropic.com/threat-intelligence-report-september-2026",
+      "published_on": null,
+      "evidence_type": "vendor_incident_report",
+      "access_level": "content_accessed",
+      "limitation": "Período coberto: dezembro de 2025 a agosto de 2026. Não representa prevalência global de abuso.",
+      "illustrative_scenario_id": "S06"
+    },
+    {
+      "id": "SRC07",
+      "title": "An alignment assessment of recent cybersecurity incidents",
+      "publisher": "Anthropic",
+      "url": "https://www.anthropic.com/research/alignment-assessment-cybersecurity-incidents",
+      "published_on": "2026-09-09",
+      "evidence_type": "vendor_incident_report",
+      "access_level": "content_accessed",
+      "limitation": "Incidentes em avaliações com isolamento configurado incorretamente; investigação independente anunciada na publicação.",
+      "illustrative_scenario_id": "S09"
+    },
+    {
+      "id": "SRC08",
+      "title": "Agentic misalignment: How LLMs could be insider threats",
+      "publisher": "Anthropic",
+      "url": "https://www.anthropic.com/research/agentic-misalignment",
+      "published_on": "2025-06-20",
+      "evidence_type": "controlled_evaluation",
+      "access_level": "content_accessed",
+      "limitation": "Cenários artificiais; não estimam frequência de comportamento em produção.",
+      "illustrative_scenario_id": "S04"
+    },
+    {
+      "id": "SRC09",
+      "title": "AI models may be capable of self-replicating without access to a datacenter",
+      "publisher": "Anthropic",
+      "url": "https://www.anthropic.com/research/self-replicating-ai",
+      "published_on": "2026-10-12",
+      "evidence_type": "controlled_evaluation",
+      "access_level": "content_accessed",
+      "limitation": "Experimento e projeção com acesso inicial simplificado; não é relato de autorreplicação em circulação.",
+      "illustrative_scenario_id": "S10"
+    },
+    {
+      "id": "SRC10",
+      "title": "AgentDojo: A Dynamic Environment to Evaluate Prompt Injection Attacks and Defenses for LLM Agents",
+      "publisher": "Debenedetti et al.",
+      "url": "https://arxiv.org/abs/2406.13352v3",
+      "published_on": "2024-11-24",
+      "evidence_type": "research_paper",
+      "access_level": "abstract_accessed",
+      "limitation": "v3; publicação inicial em 19/06/2024. Benchmark externo, não resultado deste projeto.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC11",
+      "title": "Defeating Prompt Injections by Design (CaMeL)",
+      "publisher": "Debenedetti et al.",
+      "url": "https://arxiv.org/abs/2503.18813v2",
+      "published_on": "2025-06-24",
+      "evidence_type": "research_paper",
+      "access_level": "abstract_accessed",
+      "limitation": "v2; publicação inicial em 24/03/2025. Garantias limitadas ao desenho e modelo de ameaça do artigo.",
+      "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC12",
+      "title": "OWASP Top 10 for Agentic Applications for 2026",
+      "publisher": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/",
+      "published_on": "2025-12-09",
+      "evidence_type": "security_framework",
+      "access_level": "content_accessed",
+      "limitation": "Versão Agentic 2026; mapeamento de cenários pelo projeto é interpretativo.",
+      "illustrative_scenario_id": "S01"
+    },
+    {
+      "id": "SRC13",
+      "title": "LLM06:2025 Excessive Agency",
+      "publisher": "OWASP GenAI Security Project",
+      "url": "https://genai.owasp.org/llmrisk/llm062025-excessive-agency/",
+      "published_on": null,
+      "evidence_type": "security_guidance",
+      "access_level": "content_accessed",
+      "limitation": "Referência explicitamente da edição LLM 2025; não apresentada como a edição LLM mais recente.",
+      "illustrative_scenario_id": "S06"
+    },
+    {
+      "id": "SRC14",
+      "title": "MITRE ATLAS",
+      "publisher": "MITRE",
+      "url": "https://atlas.mitre.org/",
+      "published_on": null,
+      "evidence_type": "security_framework",
+      "access_level": "overview_accessed",
+      "limitation": "Base viva; revisão e IDs específicos serão fixados na implementação.",
+      "illustrative_scenario_id": "S08"
+    },
+    {
+      "id": "SRC15",
+      "title": "Semantic Conventions for GenAI agent and framework spans",
+      "publisher": "OpenTelemetry",
+      "url": "https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Status Development na consulta; fixar revisão ao implementar.",
+      "illustrative_scenario_id": "S08"
+    },
+    {
+      "id": "SRC16",
+      "title": "CISA and UK NCSC Unveil Joint Guidelines for Secure AI System Development",
+      "publisher": "CISA / UK NCSC",
+      "url": "https://www.cisa.gov/news-events/alerts/2023/11/26/cisa-and-uk-ncsc-unveil-joint-guidelines-secure-ai-system-development",
+      "published_on": "2023-11-26",
+      "evidence_type": "security_guidance",
+      "access_level": "overview_accessed",
+      "limitation": "Referência de ciclo de vida seguro, não medição de eficácia do laboratório.",
+      "illustrative_scenario_id": "S09"
+    }
+  ]
+}

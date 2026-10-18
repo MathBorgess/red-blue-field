@@ -1,0 +1,9 @@
+# Artefatos brutos continuam preservados no disco; exportações públicas são explícitas.
+artifacts/raw/
+artifacts/private/
+.env
+.env.*
+!.env.example
+__pycache__/
+.venv/
+.DS_Store

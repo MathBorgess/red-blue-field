@@ -1,0 +1,107 @@
+{
+  "schema_version": "0.1.0",
+  "repository": "MathBorgess/red-blue-field",
+  "publication_status": "prepared",
+  "issues": [
+    {
+      "id": "RB-001",
+      "title": "Pesquisa: consolidar fontes, limites de evidência e dez cenários",
+      "body_file": "01-pesquisa.md",
+      "intended_state": "closed",
+      "depends_on": [],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-002",
+      "title": "Spec: revisar arquitetura, fronteira de testes e protocolo experimental",
+      "body_file": "02-spec.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-001"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-003",
+      "title": "MVP: executar primeiro episódio completo de autorização entre tenants (S01)",
+      "body_file": "03-episodio-s01.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-002"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-004",
+      "title": "MVP: integrar agentes red/alvo e prompt injection com sink local (S02)",
+      "body_file": "04-red-e-s02.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-003"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-005",
+      "title": "MVP: avaliar envenenamento de metadados de ferramentas (S03)",
+      "body_file": "05-ferramentas-s03.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-004"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-006",
+      "title": "MVP: implementar agente blue e comparar detecção e contenção",
+      "body_file": "06-blue.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-004"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-007",
+      "title": "MVP: implementar revisão humana e aprovação vinculada à ação (S04)",
+      "body_file": "07-supervisao-s04.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-003",
+        "RB-006"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-008",
+      "title": "Estudo: executar campanha comparada e publicar dataset e traces",
+      "body_file": "08-campanha-dataset.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-005",
+        "RB-006",
+        "RB-007"
+      ],
+      "github_number": null,
+      "github_url": null
+    },
+    {
+      "id": "RB-009",
+      "title": "Expansão: selecionar cenários S05–S10 a partir dos resultados do piloto",
+      "body_file": "09-expansao.md",
+      "intended_state": "open",
+      "depends_on": [
+        "RB-008"
+      ],
+      "github_number": null,
+      "github_url": null
+    }
+  ]
+}

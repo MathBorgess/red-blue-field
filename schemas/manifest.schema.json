@@ -1,0 +1,303 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "red-blue-field run manifest, draft 0.1.0",
+  "required": [
+    "schema_version",
+    "record_kind",
+    "run_id",
+    "status",
+    "created_at",
+    "code_commit",
+    "scenario_version",
+    "policy_version",
+    "fixture_id",
+    "fixture_hash",
+    "seed",
+    "profile_id",
+    "reviewer_kind",
+    "model_configuration",
+    "budgets",
+    "artifacts",
+    "last_event_hash",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "record_kind": {
+      "enum": [
+        "illustrative",
+        "fixture_replay",
+        "model_run"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "not_executed",
+        "complete",
+        "interrupted",
+        "invalid"
+      ]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "code_commit": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|not_applicable)$"
+    },
+    "scenario_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "policy_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fixture_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fixture_hash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "profile_id": {
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ]
+    },
+    "reviewer_kind": {
+      "enum": [
+        "none",
+        "scripted_reviewer",
+        "human_reviewer"
+      ]
+    },
+    "model_configuration": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "provider",
+          "model_id",
+          "revision",
+          "parameters"
+        ],
+        "properties": {
+          "role": {
+            "enum": [
+              "red",
+              "target",
+              "blue",
+              "grader"
+            ]
+          },
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "model_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parameters": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "budgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_steps",
+        "max_model_calls",
+        "max_total_tokens",
+        "wall_time_seconds",
+        "monetary_cap_usd"
+      ],
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_model_calls": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "max_total_tokens": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "wall_time_seconds": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "monetary_cap_usd": {
+          "type": "number",
+          "minimum": 0
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256",
+          "kind"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "kind": {
+            "enum": [
+              "events",
+              "episodes",
+              "state_before",
+              "state_after",
+              "report",
+              "other"
+            ]
+          }
+        }
+      }
+    },
+    "last_event_hash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "illustrative"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "not_executed"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "status": {
+            "enum": [
+              "complete",
+              "interrupted",
+              "invalid"
+            ]
+          },
+          "code_commit": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "fixture_hash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "profile_id": {
+            "const": "D"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reviewer_kind": {
+            "enum": [
+              "scripted_reviewer",
+              "human_reviewer"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "model_run"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "model_configuration": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

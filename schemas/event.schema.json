@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "red-blue-field event envelope, draft 0.1.0",
+  "required": [
+    "schema_version",
+    "record_kind",
+    "run_id",
+    "episode_id",
+    "event_id",
+    "sequence",
+    "occurred_at",
+    "received_at",
+    "trace_id",
+    "span_id",
+    "parent_span_id",
+    "actor",
+    "event_type",
+    "visibility",
+    "payload",
+    "artifact_refs",
+    "prev_event_hash",
+    "event_hash"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "record_kind": {
+      "enum": [
+        "illustrative",
+        "fixture_replay",
+        "model_run"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "received_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "trace_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{32}$"
+    },
+    "span_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{16}$"
+    },
+    "parent_span_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{16}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "actor": {
+      "enum": [
+        "runner",
+        "red",
+        "target",
+        "blue",
+        "policy",
+        "tool",
+        "reviewer",
+        "collector",
+        "evaluator"
+      ]
+    },
+    "event_type": {
+      "enum": [
+        "run.started",
+        "episode.started",
+        "red.proposal",
+        "target.proposal",
+        "model.requested",
+        "model.responded",
+        "tool.requested",
+        "tool.executed",
+        "policy.evaluated",
+        "blue.alert",
+        "blue.response",
+        "approval.requested",
+        "approval.decided",
+        "state.observed",
+        "evaluator.verdict",
+        "collector.error",
+        "episode.finished",
+        "run.finished"
+      ]
+    },
+    "visibility": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "red",
+          "target",
+          "blue",
+          "reviewer",
+          "audit",
+          "public"
+        ]
+      }
+    },
+    "payload": {
+      "type": "object"
+    },
+    "artifact_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "prev_event_hash": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "event_hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

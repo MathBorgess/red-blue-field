@@ -1,0 +1,393 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "title": "red-blue-field episode verdict, draft 0.1.0",
+  "required": [
+    "schema_version",
+    "record_kind",
+    "run_id",
+    "episode_id",
+    "scenario_id",
+    "profile_id",
+    "reviewer_kind",
+    "validity",
+    "outcome",
+    "attacker_success",
+    "legitimate_task_success",
+    "termination_reason",
+    "evidence_event_ids",
+    "state_before_ref",
+    "state_after_ref",
+    "metrics"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "record_kind": {
+      "enum": [
+        "illustrative",
+        "fixture_replay",
+        "model_run"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scenario_id": {
+      "type": "string",
+      "pattern": "^S[0-9]{2}$"
+    },
+    "profile_id": {
+      "enum": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ]
+    },
+    "reviewer_kind": {
+      "enum": [
+        "none",
+        "scripted_reviewer",
+        "human_reviewer"
+      ]
+    },
+    "validity": {
+      "enum": [
+        "valid",
+        "invalid",
+        "not_executed"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "attacker_success",
+        "blocked",
+        "no_effect",
+        "unknown",
+        "not_executed"
+      ]
+    },
+    "attacker_success": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "legitimate_task_success": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "termination_reason": {
+      "enum": [
+        "completed",
+        "model_refusal",
+        "budget_exhausted",
+        "human_decision",
+        "controller_stop",
+        "infrastructure_failure",
+        "example_only"
+      ]
+    },
+    "evidence_event_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "state_before_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "state_after_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model_calls",
+        "tool_calls",
+        "total_tokens",
+        "cost_usd",
+        "elapsed_ms",
+        "detection_ms",
+        "containment_ms",
+        "recovery_ms"
+      ],
+      "properties": {
+        "model_calls": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "tool_calls": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "total_tokens": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "cost_usd": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "elapsed_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "detection_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "containment_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "recovery_ms": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "illustrative"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "validity": {
+            "const": "not_executed"
+          },
+          "outcome": {
+            "const": "not_executed"
+          },
+          "attacker_success": {
+            "type": "null"
+          },
+          "legitimate_task_success": {
+            "type": "null"
+          },
+          "termination_reason": {
+            "const": "example_only"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "validity": {
+            "enum": [
+              "valid",
+              "invalid"
+            ]
+          },
+          "outcome": {
+            "enum": [
+              "attacker_success",
+              "blocked",
+              "no_effect",
+              "unknown"
+            ]
+          },
+          "termination_reason": {
+            "not": {
+              "const": "example_only"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "attacker_success"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "attacker_success": {
+            "const": true
+          },
+          "validity": {
+            "const": "valid"
+          }
+        },
+        "required": [
+          "attacker_success"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "enum": [
+              "blocked",
+              "no_effect"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "attacker_success": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "outcome": {
+            "const": "unknown"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "attacker_success": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validity": {
+            "const": "valid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "state_before_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state_after_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "evidence_event_ids": {
+            "minItems": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validity": {
+            "const": "invalid"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "const": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "profile_id": {
+            "enum": [
+              "A",
+              "B",
+              "C"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reviewer_kind": {
+            "const": "none"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "profile_id": {
+            "const": "D"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "reviewer_kind": {
+            "enum": [
+              "scripted_reviewer",
+              "human_reviewer"
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
