@@ -1,0 +1,224 @@
+{
+  "schema_version": "0.3.0",
+  "prepared_on": "2026-10-19",
+  "project": {
+    "name": "red-blue-field — Cybersec assistida por IA",
+    "url": "https://linear.app/borgesmathai/project/red-blue-field-cybersec-assistida-por-ia-308aa2d73299"
+  },
+  "parent": {
+    "identifier": "MAT-289",
+    "url": "https://linear.app/borgesmathai/issue/MAT-289/concluir-formacao-pratica-no-red-blue-field-e-validar-dominio-com"
+  },
+  "status_at_creation": "Backlog",
+  "verification_status": "verified",
+  "tasks": [
+    {
+      "key": "L01",
+      "identifier": "MAT-290",
+      "url": "https://linear.app/borgesmathai/issue/MAT-290/dominar-rede-requisicoes-identidade-e-autorizacao",
+      "title": "Dominar rede, requisições, identidade e autorização",
+      "depends_on": [],
+      "github_issue": 3,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L02",
+      "identifier": "MAT-291",
+      "url": "https://linear.app/borgesmathai/issue/MAT-291/construir-escopo-coleta-e-primeiro-episodio-verificavel",
+      "title": "Construir escopo, coleta e primeiro episódio verificável",
+      "depends_on": [
+        "L01"
+      ],
+      "github_issue": 3,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L03",
+      "identifier": "MAT-292",
+      "url": "https://linear.app/borgesmathai/issue/MAT-292/inventariar-ferramentas-pentagi-e-dominar-seus-limites",
+      "title": "Inventariar ferramentas PentAGI e dominar seus limites",
+      "depends_on": [
+        "L02"
+      ],
+      "github_issue": 10,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L04",
+      "identifier": "MAT-293",
+      "url": "https://linear.app/borgesmathai/issue/MAT-293/praticar-descoberta-de-servicos-e-superficies-web",
+      "title": "Praticar descoberta de serviços e superfícies web",
+      "depends_on": [
+        "L03"
+      ],
+      "github_issue": 10,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L05",
+      "identifier": "MAT-294",
+      "url": "https://linear.app/borgesmathai/issue/MAT-294/validar-banco-e-execucao-limitada-com-sqlmap-e-metasploit",
+      "title": "Validar banco e execução limitada com sqlmap e Metasploit",
+      "depends_on": [
+        "L04"
+      ],
+      "github_issue": 10,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L06",
+      "identifier": "MAT-295",
+      "url": "https://linear.app/borgesmathai/issue/MAT-295/construir-agentes-e-testar-objetivo-e-ferramentas",
+      "title": "Construir agentes e testar objetivo e ferramentas",
+      "depends_on": [
+        "L02"
+      ],
+      "github_issue": 4,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L07",
+      "identifier": "MAT-296",
+      "url": "https://linear.app/borgesmathai/issue/MAT-296/testar-memoria-autonomia-loops-e-evidencia-hostil",
+      "title": "Testar memória, autonomia, loops e evidência hostil",
+      "depends_on": [
+        "L06"
+      ],
+      "github_issue": 9,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L08",
+      "identifier": "MAT-297",
+      "url": "https://linear.app/borgesmathai/issue/MAT-297/implementar-busca-em-profundidade-por-hipoteses-e-evidencias",
+      "title": "Implementar busca em profundidade por hipóteses e evidências",
+      "depends_on": [
+        "L04",
+        "L06"
+      ],
+      "github_issue": null,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L09",
+      "identifier": "MAT-298",
+      "url": "https://linear.app/borgesmathai/issue/MAT-298/auditar-codigo-e-verificar-achados-de-forma-independente",
+      "title": "Auditar código e verificar achados de forma independente",
+      "depends_on": [
+        "L05",
+        "L06"
+      ],
+      "github_issue": 15,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L10",
+      "identifier": "MAT-299",
+      "url": "https://linear.app/borgesmathai/issue/MAT-299/construir-blue-team-e-comprovar-contencao-e-recuperacao",
+      "title": "Construir blue team e comprovar contenção e recuperação",
+      "depends_on": [
+        "L06",
+        "L08"
+      ],
+      "github_issue": 6,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L11",
+      "identifier": "MAT-300",
+      "url": "https://linear.app/borgesmathai/issue/MAT-300/validar-supervisao-e-intervencao-humana-no-sistema",
+      "title": "Validar supervisão e intervenção humana no sistema",
+      "depends_on": [
+        "L10"
+      ],
+      "github_issue": 7,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L12",
+      "identifier": "MAT-301",
+      "url": "https://linear.app/borgesmathai/issue/MAT-301/entregar-mcp-red-conectavel-aos-agentes-do-usuario",
+      "title": "Entregar MCP red conectável aos agentes do usuário",
+      "depends_on": [
+        "L05",
+        "L08",
+        "L09"
+      ],
+      "github_issue": null,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L13",
+      "identifier": "MAT-302",
+      "url": "https://linear.app/borgesmathai/issue/MAT-302/entregar-mcp-blue-para-defesa-e-contencao",
+      "title": "Entregar MCP blue para defesa e contenção",
+      "depends_on": [
+        "L10",
+        "L11"
+      ],
+      "github_issue": null,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L14",
+      "identifier": "MAT-303",
+      "url": "https://linear.app/borgesmathai/issue/MAT-303/estudar-permissoes-rede-e-disponibilidade-cloud",
+      "title": "Estudar permissões, rede e disponibilidade cloud",
+      "depends_on": [
+        "L05",
+        "L11"
+      ],
+      "github_issue": 11,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L15",
+      "identifier": "MAT-304",
+      "url": "https://linear.app/borgesmathai/issue/MAT-304/demonstrar-cadeia-servico-agente-e-cloud",
+      "title": "Demonstrar cadeia serviço, agente e cloud",
+      "depends_on": [
+        "L07",
+        "L14"
+      ],
+      "github_issue": 12,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L16",
+      "identifier": "MAT-305",
+      "url": "https://linear.app/borgesmathai/issue/MAT-305/comparar-agentes-ferramentas-e-publicar-dataset-observavel",
+      "title": "Comparar agentes, ferramentas e publicar dataset observável",
+      "depends_on": [
+        "L09",
+        "L12",
+        "L13",
+        "L15"
+      ],
+      "github_issue": 8,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L17",
+      "identifier": "MAT-306",
+      "url": "https://linear.app/borgesmathai/issue/MAT-306/resolver-prova-inedita-e-validar-dominio-com-revisao-humana",
+      "title": "Resolver prova inédita e validar domínio com revisão humana",
+      "depends_on": [
+        "L16"
+      ],
+      "github_issue": null,
+      "state_at_creation": "Backlog"
+    },
+    {
+      "key": "L18",
+      "identifier": "MAT-307",
+      "url": "https://linear.app/borgesmathai/issue/MAT-307/concluir-documento-de-aprendizado-supervisao-e-intervencao-humana",
+      "title": "Concluir documento de aprendizado, supervisão e intervenção humana",
+      "depends_on": [
+        "L17"
+      ],
+      "github_issue": 14,
+      "state_at_creation": "Backlog"
+    }
+  ],
+  "verified_on": "2026-10-20"
+}

@@ -1,47 +1,37 @@
-# Trilha de aprendizado prático
+# Trilha de capacitação em segurança assistida por agentes
 
-O objetivo é dominar o mecanismo e demonstrar capacidade de avaliação. Cada módulo produz explicação própria, reprodução, prova do efeito, defesa e reteste. Um resultado negativo bem fundamentado também encerra um estudo.
+Revisão 0.3. O estudo avança por evidência de domínio. As tarefas estão no [backlog do Linear](linear-backlog.md).
 
-| Módulo | Construir e estudar | Exercício e evidência |
-| --- | --- | --- |
-| 1. Agentes por dentro | Laço pequeno, ferramentas, identidade, memória, erro e interrupção. | Explicar e executar uma tarefa legítima do FieldDesk sem esconder o fluxo em framework. |
-| 2. Segurança básica | HTTP, API, autenticação, autorização, banco e rede. | Desenhar fronteiras e reproduzir S01 manualmente com logs do alvo. |
-| 3. Pentest com agente | Inventário, hipóteses, seleção de ferramenta e prova. | Comparar manual/script/agente em S11–S12; confirmar marcador no dado/processo e corrigir. |
-| 3b. Auditoria e verificação | Código, cobertura, fronteiras e achados; método da Cloudflare. | Rastrear uma falha real, rejeitar um falso positivo e registrar uma validação bloqueada; corrigir e retestar. |
-| 4. Objetivo e ferramentas | Prompt injection direto/indireto, composição e metadados. | S02–S03; separar desvio do modelo de efeito bloqueado pela aplicação. |
-| 5. Memória e autonomia | Sessões, persistência, delegação, orçamento e revogação. | S05–S09; medir influência posterior, loops e resposta correta a tarefa impossível. |
-| 6. Defesa e supervisão | Blue, origem de sinais, contenção e aprovação atômica. | B/C e C/D; S04; verificar proteção sem bloquear toda tarefa legítima. |
-| 7. Frameworks e benchmarks | Adaptador CrewAI; Radar, AgentDojo e Agent-SafetyBench. | Comparar o mesmo caso com o agente simples e o framework; explicar a cobertura efetiva de cada ferramenta. |
-| 8. Cloud security | IAM, rede, armazenamento, telemetria e infraestrutura como código. | S13–S15 em sandbox; comparar permissões pretendidas e efetivas, restaurar e verificar teardown. |
-| 9. Cadeias híbridas | Falha de serviço altera agente; agente altera serviço/cloud. | S16–S18, com prova de cada transição e contenção blue. |
-| 10. Método experimental | Ablação, pareamento, famílias reservadas e custo. | Publicar release por frente e ambiente, com falhas e denominadores. |
-| 11. Portfólio | Relato técnico com artefatos auditáveis. | Produzir de cinco a dez estudos a partir de execuções; plano inicial com oito temas. |
+| Etapa | Prática e prova |
+| --- | --- |
+| 1. Fundamentos | Requisição, identidade, autorização, rede e registros; desenho de fronteiras e S01 manual. |
+| 2. Fundação | FieldDesk, escopo, coletor e primeiro episódio com efeito verificável. |
+| 3. Ferramentas PentAGI | Disponibilidade, versão, sintaxe e escolha entre descoberta e validação. |
+| 4. Pentest local | Nmap, descoberta web, sqlmap e prova de execução selecionada em alvo descartável. |
+| 5. Agentes | Laço transparente, documentos, metadados, memória e autonomia. |
+| 6. Hipóteses | Fonte OWASP, evidências filhas, busca em profundidade, refutação e parada. |
+| 7. Auditoria | Cobertura de código, falso positivo e verificação independente inspirada na Cloudflare. |
+| 8. Blue | Sinais, investigação, contenção e recuperação verificadas. |
+| 9. Supervisão | Aprovação vinculada, recusa, alteração, expiração e interrupção. |
+| 10. MCP red | Servidor, identidade, adaptadores e conexão com dois clientes. |
+| 11. MCP blue | Servidor defensivo, separação de papéis e contenção reversível. |
+| 12. Cloud e híbridos | Permissões efetivas, rede, disponibilidade e cadeias com provas por transição. |
+| 13. Comparação | Manual/script/agente, perfis de defesa e frameworks, com limites equivalentes. |
+| 14. Avaliação | Casos inéditos, prova manual, explicação e reteste perante revisor humano. |
+| 15. Documento final | Aprendizado, intervenções, rubrica, lacunas e portfólio. |
 
-A fase cloud começa depois de conta, recursos, política e orçamento definidos. O ambiente local permite aprender e produzir evidência antes desse investimento.
+## Regra de passagem
 
-Construir o planejador/runner inspirado no [PentAGI](reference-blueprints.md) durante o módulo 3. Comparar a plataforma upstream somente depois de verificar a implementação própria. No módulo 3b, usar a skill da Cloudflare como referência de método, mantendo a verificação de código separada do pentest black box.
+1. Explicar o mecanismo e a fronteira envolvida.
+2. Reproduzir a prova e conferir o efeito fora do relato do agente.
+3. Corrigir a causa e verificar a tarefa legítima.
+4. Resolver uma variante e registrar assistência recebida.
+5. Receber avaliação humana e definir reteste quando necessário.
 
-## Sequência de entregas
+Começar com agente próprio e ferramentas específicas. Adotar CrewAI e comparar PentAGI depois de validar os contratos básicos.
 
-1. Fundação: escopo, fixture, coletor e primeiro episódio completo S01.
-2. Duas frentes em paralelo lógico: agente red/alvo para S02 e pentest de serviço local para S11–S12.
-3. S03, memória, autonomia, blue e revisão, com controles benignos.
-4. Adaptador CrewAI e comparações de ferramentas; congelar o primeiro conjunto local reservado.
-5. Campanha local e primeira release; preparar cloud sem pressupor equivalência da emulação.
-6. S13–S15 cloud e S16–S18 híbridos; releases incrementais.
-7. Estudos técnicos com links para runs, causas, correções e limitações.
+Radar, AgentDojo e Agent-SafetyBench complementam a avaliação. Seus escores permanecem separados dos resultados FieldDesk.
 
-A sequência é um plano de implementação; não é registro de execução nem agendamento.
+A etapa cloud exige preparação de conta, recursos, política, orçamento e recuperação. O currículo local permite avançar antes desse investimento.
 
-## Como demonstrar domínio
-
-Para cada módulo, o estudante deve conseguir:
-
-- Explicar identidade, entrada, estado e fronteira atravessada.
-- Distinguir a hipótese, o que observou e o que permanece desconhecido.
-- Reproduzir a prova sem depender de uma narrativa do agente.
-- Corrigir a causa, retestar e mostrar que a tarefa legítima continua funcionando.
-- Explicar por que uma defesa falhou e qual outra camada conteve o efeito.
-- Adaptar o experimento a uma variante nova sem alterar o oráculo para fazê-la passar.
-
-A previsão de mercado apresentada é motivação para a trilha. As entregas medem competência e resultados do laboratório, não demanda futura por vagas.
+O [plano de avaliação](learning-assessment.md) define competências e rubrica. O [documento final](final-learning-report-template.md) registra o parecer humano após os experimentos.

@@ -1,6 +1,6 @@
 {
   "schema_version": "0.2.0",
-  "retrieved_on": "2026-10-18",
+  "retrieved_on": "2026-10-19",
   "selection": "Fontes públicas primárias; resumos próprios. Conteúdo privado não é distribuído.",
   "sources": [
     {
@@ -191,7 +191,11 @@
       "illustrative_scenario_id": "S11",
       "consulted_revision": "843dfeb4bfc809c09d1bc5022e567c602d8fc9dd",
       "consulted_paths": [
-        "README.md"
+        "README.md",
+        "backend/pkg/templates/prompts/pentester.tmpl",
+        "backend/docs/flow_execution.md",
+        "backend/pkg/tools/registry.go",
+        "backend/docs/prompt_engineering_pentagi.md"
       ],
       "license_observed": "MIT (core; review dependency/service terms separately)"
     },
@@ -367,6 +371,50 @@
       "access_level": "content_accessed",
       "limitation": "Lista LLM/GenAI distinta de Agentic; fixar edição sem converter automaticamente os IDs antigos.",
       "illustrative_scenario_id": "S02"
+    },
+    {
+      "id": "SRC33",
+      "title": "Tools — MCP specification",
+      "publisher": "Model Context Protocol",
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/server/tools",
+      "published_on": null,
+      "evidence_type": "technical_documentation",
+      "access_level": "content_accessed",
+      "limitation": "Baseline 2025-11-25; protocol negotiation and SDK support require implementation tests.",
+      "illustrative_scenario_id": "S03"
+    },
+    {
+      "id": "SRC34",
+      "title": "Security Best Practices — MCP",
+      "publisher": "Model Context Protocol",
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices",
+      "published_on": null,
+      "evidence_type": "security_guidance",
+      "access_level": "content_accessed",
+      "limitation": "Guidance does not prove authorization, isolation or safety of the proposed servers.",
+      "illustrative_scenario_id": "S03"
+    },
+    {
+      "id": "SRC35",
+      "title": "NICE Framework — Current Versions",
+      "publisher": "NIST",
+      "url": "https://www.nist.gov/itl/applied-cybersecurity/nice/nice-framework-resource-center/nice-framework-current-versions",
+      "published_on": null,
+      "evidence_type": "workforce_framework",
+      "access_level": "content_accessed",
+      "limitation": "Task/knowledge/skill reference; the project rubric is not an official certification.",
+      "illustrative_scenario_id": "S01"
+    },
+    {
+      "id": "SRC36",
+      "title": "Technical Guide to Information Security Testing and Assessment",
+      "publisher": "NIST",
+      "url": "https://csrc.nist.gov/pubs/sp/800/115/final",
+      "published_on": "2008-09-30",
+      "evidence_type": "security_guidance",
+      "access_level": "content_accessed",
+      "limitation": "SP 800-115, 2008; process reference, not a dedicated agent-security evaluation.",
+      "illustrative_scenario_id": "S01"
     }
   ]
 }

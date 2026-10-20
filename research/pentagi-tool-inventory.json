@@ -1,0 +1,187 @@
+{
+  "schema_version": "0.3.0",
+  "retrieved_on": "2026-10-19",
+  "status": "documented_not_installed",
+  "source_revision": "843dfeb4bfc809c09d1bc5022e567c602d8fc9dd",
+  "source_url": "https://github.com/vxcontrol/pentagi/blob/843dfeb4bfc809c09d1bc5022e567c602d8fc9dd/backend/pkg/templates/prompts/pentester.tmpl",
+  "availability_note": "Names documented in upstream prompt. Image digest, installed versions and capabilities require independent checks. Patterns such as impacket-* denote families, not resolved binaries.",
+  "groups": [
+    {
+      "id": "network_recon",
+      "documented_names": [
+        "nmap",
+        "masscan",
+        "nping",
+        "amass",
+        "theharvester",
+        "subfinder",
+        "shuffledns",
+        "dnsx",
+        "assetfinder",
+        "chaos",
+        "dnsrecon",
+        "fierce",
+        "netdiscover",
+        "arp-scan",
+        "arping",
+        "fping",
+        "hping3",
+        "nbtscan",
+        "onesixtyone",
+        "sublist3r",
+        "ncrack",
+        "ike-scan"
+      ],
+      "adoption": "staged_core_selection",
+      "verified_installed": false
+    },
+    {
+      "id": "web_testing",
+      "documented_names": [
+        "gobuster",
+        "dirb",
+        "dirsearch",
+        "feroxbuster",
+        "ffuf",
+        "nikto",
+        "whatweb",
+        "sqlmap",
+        "wfuzz",
+        "wpscan",
+        "commix",
+        "davtest",
+        "skipfish",
+        "httpx",
+        "katana",
+        "hakrawler",
+        "waybackurls",
+        "gau",
+        "nuclei",
+        "naabu"
+      ],
+      "adoption": "staged_core_selection",
+      "verified_installed": false
+    },
+    {
+      "id": "password_attacks",
+      "documented_names": [
+        "hydra",
+        "john",
+        "hashcat",
+        "crunch",
+        "medusa",
+        "patator",
+        "hashid",
+        "hash-identifier",
+        "*2john (7z, bitcoin, keepass, office, pdf, rar, ssh, zip, gpg, putty, truecrypt, luks)"
+      ],
+      "adoption": "optional_or_deferred",
+      "verified_installed": false
+    },
+    {
+      "id": "metasploit",
+      "documented_names": [
+        "msfconsole",
+        "msfvenom",
+        "msfdb",
+        "msfrpcd",
+        "msfupdate",
+        "msf-pattern_*",
+        "msf-find_badchars",
+        "msf-egghunter",
+        "msf-makeiplist"
+      ],
+      "adoption": "staged_core_selection",
+      "verified_installed": false
+    },
+    {
+      "id": "windows_ad",
+      "documented_names": [
+        "impacket-*",
+        "evil-winrm",
+        "bloodhound-python",
+        "crackmapexec",
+        "netexec",
+        "responder",
+        "certipy-ad",
+        "ldapdomaindump",
+        "enum4linux",
+        "smbclient",
+        "smbmap",
+        "mimikatz",
+        "lsassy",
+        "pypykatz",
+        "pywerview",
+        "minikerberos-*"
+      ],
+      "adoption": "optional_or_deferred",
+      "verified_installed": false
+    },
+    {
+      "id": "post_exploit",
+      "documented_names": [
+        "powershell-empire",
+        "starkiller",
+        "unicorn-magic",
+        "weevely",
+        "proxychains4",
+        "chisel",
+        "iodine",
+        "ptunnel",
+        "socat",
+        "netcat",
+        "nc",
+        "ncat"
+      ],
+      "adoption": "optional_or_deferred",
+      "verified_installed": false
+    },
+    {
+      "id": "traffic_analysis",
+      "documented_names": [
+        "tshark",
+        "tcpdump",
+        "tcpreplay",
+        "mitmdump",
+        "mitmproxy",
+        "mitmweb",
+        "sslscan",
+        "sslsplit",
+        "stunnel4"
+      ],
+      "adoption": "staged_core_selection",
+      "verified_installed": false
+    },
+    {
+      "id": "reverse_eng",
+      "documented_names": [
+        "radare2",
+        "r2",
+        "rabin2",
+        "radiff2",
+        "binwalk",
+        "bulk_extractor",
+        "ROPgadget",
+        "ropper",
+        "strings",
+        "objdump",
+        "steghide",
+        "foremost"
+      ],
+      "adoption": "optional_or_deferred",
+      "verified_installed": false
+    },
+    {
+      "id": "osint_search",
+      "documented_names": [
+        "searchsploit",
+        "shodan",
+        "censys",
+        "wordlists (/usr/share/wordlists)",
+        "seclists (/usr/share/seclists)"
+      ],
+      "adoption": "optional_or_deferred",
+      "verified_installed": false
+    }
+  ]
+}

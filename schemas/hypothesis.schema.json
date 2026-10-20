@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Hypothesis node — draft 0.3.0",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "0.3.0"
+    },
+    "record_kind": {
+      "enum": [
+        "illustrative",
+        "fixture_replay",
+        "tool_run",
+        "model_run"
+      ]
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "episode_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "hypothesis_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "parent_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "depth": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "scope_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_revision": {
+      "type": "string",
+      "pattern": "^([a-f0-9]{40}|not_applicable)$"
+    },
+    "claim": {
+      "type": "string",
+      "minLength": 1
+    },
+    "falsification_criterion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "minItems": 0,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "proposed_test_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "proposed",
+        "testing",
+        "supported",
+        "refuted",
+        "inconclusive",
+        "blocked",
+        "pruned",
+        "deferred",
+        "not_executed"
+      ]
+    },
+    "decision_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "human_intervention_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verifier_ref": {
+      "anyOf": [
+        {
+          "type": "string",
+          "minLength": 1
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "record_kind",
+    "run_id",
+    "episode_id",
+    "hypothesis_id",
+    "parent_ids",
+    "depth",
+    "scope_ref",
+    "source_revision",
+    "claim",
+    "falsification_criterion",
+    "source_refs",
+    "evidence_refs",
+    "proposed_test_ref",
+    "status",
+    "decision_reason",
+    "fingerprint",
+    "human_intervention_ref",
+    "verifier_ref"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "record_kind": {
+            "const": "illustrative"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "not_executed"
+          },
+          "evidence_refs": {
+            "maxItems": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "status": {
+            "not": {
+              "const": "not_executed"
+            }
+          },
+          "source_revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "parent_ids": {
+            "maxItems": 0
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "depth": {
+            "const": 0
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "depth": {
+            "minimum": 1
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "enum": [
+              "supported",
+              "refuted"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence_refs": {
+            "minItems": 1
+          }
+        }
+      }
+    }
+  ]
+}

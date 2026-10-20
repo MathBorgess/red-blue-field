@@ -1,72 +1,99 @@
 # Dataset e traces observáveis
 
-Estado: contrato proposto. Os schemas deste repositório definem formatos de revisão; não representam uma implementação de coleta. Exemplos em `examples/` são ilustrativos, sem ataque executado e sem valor para métricas.
+Revisão documental 0.3. Coleta e execução aguardam implementação. Os exemplos ilustram formatos e permanecem fora das métricas.
 
-## Evidência obrigatória por execução
+## Artefatos por episódio
 
-Cada execução deverá gerar:
-
-- `manifest.json`: versões de código/modelo/política/cenário, fixture, seed, parâmetros, orçamento e checksums dos artefatos.
-- `scope.json`: contrato de recursos, identidades, ações, destinos, validade, limites, interrupção e recuperação; hash fixado no manifesto.
-- `events.jsonl`: eventos do controlador, red, assistente alvo, políticas, ferramentas, blue, revisão e avaliador, correlacionados por IDs.
-- `episodes.jsonl`: rótulos, resultados, custo, utilidade, término e referências de evidência.
-- Snapshots inicial/final ou deltas verificáveis da aplicação e ledger do sink.
-- Artefatos retornados pelo provedor e ferramentas, com proveniência e versão da transformação de publicação.
-- `report.json` e uma síntese legível com denominadores, casos e limitações.
-- Em auditoria white box, `coverage-ledger.json` e `findings.jsonl`, ligados à revisão auditada e às provas runtime disponíveis.
-
-Um episódio com coleta incompleta não será descartado silenciosamente. O controlador preserva o que existe, registra uma falha por canal de supervisão e encerra antes de novas ações com efeito. Se um efeito já puder ter ocorrido, seu resultado fica desconhecido até reconciliação com a aplicação.
+| Artefato | Conteúdo |
+| --- | --- |
+| `manifest.json` | Código, modelo, cenário, configuração, orçamento, escopo e checksums. |
+| `scope.json` | Recursos, identidades, ações, destinos, validade, interrupção e recuperação. |
+| `events.jsonl` | Propostas, chamadas, políticas, defesa, revisão e efeitos. |
+| `episodes.jsonl` | Veredito, validade, utilidade, custo e razão de término. |
+| `hypotheses.jsonl` | Pais, fonte, refutação, testes, evidências e estado da busca. |
+| Estados e deltas | Serviço, banco, processo, configuração cloud e ledger da saída. |
+| `coverage-ledger.json` e `findings.jsonl` | Cobertura de auditoria e achados com verificação independente, quando aplicável. |
+| `report.json` | Resultados, denominadores, casos, custo e limitações. |
+| Documento de aprendizado | Competências, intervenções, provas e parecer humano. |
 
 ## Correlação e origem
 
-Todo evento contém `run_id`, `episode_id`, `event_id`, sequência atribuída pelo coletor, horário UTC, `trace_id`, `span_id`, `parent_span_id`, componente, tipo e referências a artefatos. O esquema guarda horário do evento e de recebimento para identificar atraso.
+Cada evento liga execução, episódio, sequência, horário, ator e artefatos. Traços e spans permitem reconstruir chamadas entre componentes.
 
-Spans sugeridos: `episode`, `invoke_agent red`, `invoke_agent target`, `invoke_agent blue`, `model.request`, `tool.execute`, `policy.evaluate`, `approval.wait`, `response.execute` e `evaluate`. Esses nomes são internos propostos; fazer o mapeamento explícito para a revisão fixada das [convenções GenAI](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md). Propagar contexto pelo gateway e pelo executor, inclusive em filas e reintentos.
+O coletor obtém a identidade do canal autenticado. Conteúdo de ticket permanece dado observado, mesmo quando imita um registro de política.
 
-O coletor obtém a identidade do canal autenticado. Texto de ticket que se pareça com log continua sendo conteúdo de ticket. O red pode escrever nesse conteúdo, mas não pode produzir um evento autenticado de política ou de revisão.
+Registrar entradas e saídas disponíveis, ferramentas propostas e executadas, erros e decisões estruturadas. Essas decisões explicam o fluxo observado.
 
-Registrar entradas e saídas efetivamente disponibilizadas pelo provedor, ferramentas propostas e executadas, erros, recusas e resumos estruturados de decisões. Não pressupor acesso ao raciocínio interno do modelo. Um resumo explicativo não substitui evidência da ação.
+O provedor poderá omitir detalhes internos do modelo. A evidência principal continua sendo a ação e seu efeito no alvo.
 
-## Integridade e reconstrução
+Propagar contexto em filas e reintentos. Usar a revisão fixada das [convenções de agentes](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md).
 
-Somente o coletor escreve a sequência canônica. Para o primeiro marco, um ledger local de escritor único permite revisar ordem e lacunas. Na versão distribuída, usar identificadores idempotentes, sequência de recebimento e links causais; não presumir que relógios distribuídos estabeleçam causalidade.
+## Hipóteses, servidores e supervisão
 
-Gerar hashes dos artefatos, encadear envelopes canônicos dos eventos e selar a lista em um manifesto final fora das áreas graváveis pelos agentes. Um hash sozinho só detecta divergência contra uma referência confiável; não impede que alguém com controle do coletor reescreva arquivo e hash. O modelo de ameaça inicial não concede esse controle aos participantes.
+A busca em profundidade grava nós e relações conforme o [contrato de hipótese](../schemas/hypothesis.schema.json). O manifesto usa `kind: other` para esse artefato.
 
-Redação de dados altera os bytes. Exportações públicas devem ter hashes e manifesto próprios e apontar para os IDs lógicos de origem. Não afirmar que um arquivo sanitizado conserva o checksum bruto.
+Usar eventos `plan.revised` com identificadores de hipótese no payload. Chamadas, decisões e efeitos continuam com seus eventos próprios.
 
-## Visibilidade e dados
+Os servidores do Model Context Protocol (MCP) acrescentam identidade do cliente, operação, perfil e chave de idempotência à correlação.
 
-| Visão | Conteúdo |
+Cada intervenção registra o revisor, a operação exata, a informação disponível e a justificativa. Registrar também o tempo humano e o efeito posterior.
+
+Separar revisor simulado e pessoa real. O parecer final de domínio pertence ao revisor humano responsável.
+
+## Integridade e falhas
+
+Somente o coletor escreve os registros canônicos. Agentes gravam artefatos candidatos em áreas próprias; o coletor valida e promove arquivos permitidos.
+
+Encadear envelopes canônicos dos eventos e gerar hashes dos artefatos. O manifesto final permanece fora da área gravável pelos participantes.
+
+Hashes detectam divergência contra uma referência confiável. A autenticidade também depende do canal, da identidade e da proteção do coletor.
+
+Na versão distribuída, usar identificadores idempotentes, ordem de recebimento e relações causais. Relógios podem divergir entre máquinas.
+
+Se a coleta falhar, suspender novas ações. Preservar estado, reconciliar efeitos possíveis e manter resultado desconhecido quando faltar prova.
+
+## Visões e publicação
+
+| Papel | Visão |
 | --- | --- |
-| Red | Entradas enviadas, observações permitidas, consumo e resultados locais disponibilizados pelo cenário. |
-| Blue | Eventos e alertas filtrados por papel; conteúdo de evidência marcado como não confiável. |
-| Avaliador | Estado e ledger completos do episódio, canaries e oráculos reservados. |
-| Revisor | Ação exata proposta, efeito previsto, origem dos dados, versão e evidências necessárias para decidir. |
-| Publicação | Corpus sintético e exportação transformada, com política de redação e checksums próprios. |
+| Red | Entradas enviadas, observações permitidas, ferramentas e consumo próprio. |
+| Blue | Sinais e contexto defensivo, com origem e confiança do conteúdo. |
+| Avaliador | Estado, canaries e oráculos reservados. |
+| Revisor | Operação, identidade, parâmetros, versão, risco e evidências para decidir. |
+| Publicação | Exportação sintética, revisada e com checksums próprios. |
 
-Canaries são fictícios. Credenciais do broker, tokens de aprovação, dados de contas reais, mensagens privadas e logs do host não entram nos artefatos públicos. Guardar somente evidência necessária; preservar os registros do estudo até avaliação humana, sem limpeza automática por idade.
+Guardar dados brutos fora do Git. Publicar somente dados sintéticos e artefatos revisados, com licença e política de redação definidas.
 
-O armazenamento bruto permanece fora do Git. `datasets/releases/<version>/` poderá receber um export sintético revisado, data card, licença definida para aquele material e manifesto. Não reutilizar conteúdo de incidentes ou benchmarks sem verificar a licença específica; referências bibliográficas não transferem direitos sobre datasets.
+Credenciais operacionais e conversas privadas permanecem fora da exportação. Preservar correlação por aliases estáveis quando houver identificadores sensíveis.
 
-## Estados e rótulos
+Uma transformação altera os bytes. Gerar novo manifesto e novos hashes para a exportação pública.
 
-`record_kind` separa `illustrative`, `fixture_replay`, `tool_run` e `model_run`. `tool_run` identifica execução real manual/script sem modelo; replay não recebe esse rótulo. Um ensaio com um modelo local e um com API remota informam esse detalhe no manifesto. `outcome` distingue `attacker_success`, `blocked`, `no_effect`, `unknown` e `not_executed`.
+Conservar registros até avaliação humana. A política de retenção deve preservar evidências necessárias e decisões de limpeza.
 
-`termination_reason` distingue conclusão, recusa do modelo, limite de recursos, decisão humana, interrupção do controlador, erro de infraestrutura e exemplo. Um ataque malsucedido pode ser válido; um episódio inválido não vira defesa bem-sucedida. Resultado adversarial, conclusão da tarefa legítima e qualidade da evidência são campos independentes.
+## Estados e contratos
 
-`study_context` informa frente, ambiente efetivo, modo ofensivo, acesso black/gray/white box, variante de guardrail e versão da contenção externa. Manifesto e episódios devem concordar; uma campanha com dimensões diferentes produz manifestos separados. `effect_assessment` separa desvio comportamental, comprometimento de serviço e drift cloud. Seu `proof_status` exige referência de prova para sucesso confirmado. `blocking_layer` informa o bloqueio decisivo; outras decisões da cadeia permanecem nos eventos. Recuperação não apaga uma exposição anterior.
+| Campo | Interpretação |
+| --- | --- |
+| `record_kind` | `illustrative`, `fixture_replay`, `tool_run` ou `model_run`. |
+| `outcome` | Sucesso adversarial, bloqueio, ausência de efeito, desconhecido ou sem execução. |
+| `study_context` | Frente, ambiente, modo ofensivo, acesso, variante de proteção e contenção externa. |
+| `effect_assessment` | Desvio de comportamento, comprometimento de serviço, mudança cloud e recuperação. |
+| `termination_reason` | Conclusão, recusa, orçamento, decisão humana, controlador, infraestrutura ou exemplo. |
 
-Comandos de runner geram artefatos com ferramenta/versão, script ou comando e hash, destino resolvido, timeout, stdout/stderr limitado e código de término. Logs de processo/banco e auditoria cloud precisam confirmar o efeito. Em cloud, registrar identidade, conta/região e recurso no armazenamento restrito; exportar aliases consistentes em vez de credenciais ou identificadores sensíveis. Não pressupor eventos de dados habilitados por padrão.
+Um ataque malsucedido pode produzir um episódio válido. Um episódio inválido permanece distinto de defesa bem-sucedida.
 
-## Contratos 0.2 e validação de achados
+Manifesto e episódios devem concordar no contexto. Registrar rótulos e denominadores separados para replay, serviço local, emulação e cloud real.
 
-O diretório [schemas](../schemas) contém oito contratos: evento, episódio, manifesto, catálogo, contexto do estudo, escopo, achado e cobertura. A revisão 0.1 permanece no histórico Git; não há execução medida a migrar. O exemplo foi atualizado mantendo todos os resultados não executados.
+O diretório [schemas](../schemas) contém nove contratos. Oito permanecem em 0.2; o contrato de hipótese usa 0.3.
 
-O método de [auditoria inspirado na Cloudflare](reference-blueprints.md) distingue candidatos no ledger de achados independentemente verificados. `confirmed` requer prova runtime, limite de confiança atravessado, severidade e remediação proposta; reteste pode permanecer pendente, visível como tal. `needs_validation` exige condição decisiva pendente e plano específico, sem severidade. `rejected` conserva razão e evidência da refutação. Um candidato não verificado não entra no arquivo de achados.
+Os schemas conferem estrutura. O validador semântico futuro conferirá referências, identidade dos verificadores, ordem causal, validade do escopo e evidências de cobertura.
 
-Os schemas verificam formato, não autenticidade nem verdade do achado. O validador semântico da implementação deverá conferir finder/verifier distintos, referências existentes, commit auditado, evidência de unidades marcadas `checked`, validade temporal do escopo e concordância dos contextos. Uma auditoria `complete` não aceita unidades pendentes; unidade `checked` pode conter um achado confirmado, pois cobertura não significa ausência de falha. O coletor deve verificar os bytes dos artefatos antes de promovê-los ao corpus canônico.
+O método de [auditoria](reference-blueprints.md) exige prova runtime e remediação proposta para `confirmed`. Somente achados confirmados recebem severidade.
+
+`needs_validation` exige verificação independente, condição decisiva pendente e plano específico. Candidatos sem verificação permanecem no ledger; `rejected` conserva a refutação.
 
 ## Reprodução
 
-Fixture, versão, configuração e hashes permitem reconstruir o ensaio. Reexecutar respostas de ferramentas gravadas verifica o pipeline; reconsultar um modelo verifica uma nova amostra. Seed, temperatura zero e mesmo identificador comercial não garantem respostas idênticas, especialmente quando o provedor altera revisões.
+Fixar código, configuração, fixture, ferramentas e respostas gravadas. Reproduzir respostas registradas verifica o pipeline; consultar o modelo novamente produz outra amostra.
+
+Seed e temperatura ajudam a descrever o ensaio. Mudanças do provedor e variação do modelo limitam a reprodução exata.

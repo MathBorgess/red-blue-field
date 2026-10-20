@@ -35,6 +35,11 @@
       "path": "scope.json",
       "sha256": "c858bc7d685ee964b57d342ade3c64b34cd02635888d5df0277406404c9a9630",
       "kind": "scope"
+    },
+    {
+      "path": "hypotheses.jsonl",
+      "sha256": "f1243822eb0b74793ffc3f3a9b12660c92f9ad878841e6337a2bea0d76bda1a2",
+      "kind": "other"
     }
   ],
   "last_event_hash": "686cdc97e74f7ac2660d7fa5fdabca30d068d81f6b8f9893a82698473c7509ef",

@@ -1,16 +1,39 @@
-# Validação da revisão 0.2
+# Validação da revisão 0.3
 
-Data: 18/10/2026. Escopo: pesquisa, planejamento e contratos propostos; não validação de sistemas executáveis.
+Data: 20/10/2026. Escopo: documentos, contratos, exemplos e backlog. Execução de agentes e servidores permanece pendente.
 
-- Oito schemas conferidos como JSON Schema Draft 2020-12, incluindo referências entre manifesto/episódio e contexto do estudo.
-- Dezoito cenários validados; IDs únicos e referências resolvem para 32 fontes públicas. PentAGI e Cloudflare têm revisões de código registradas no índice.
-- Seis eventos ilustrativos, um episódio não executado, escopo e manifesto validados. Estado, contexto, spans, referências, cadeia de hashes e checksums conferidos.
-- Treze variantes inválidas rejeitadas: sucesso, validade ou drift em exemplo ilustrativo; exemplo promovido a model run; perfil D sem revisor; modelo sem configuração; sucesso sem prova; cloud ativo sem revisão de política; achado confirmado sem prova runtime; pendência com severidade ou sem condição decisiva; cobertura completa com unidade pendente; ambiente desconhecido.
-- Entradas sintéticas de validação exercitaram os três estados de achados e cobertura completa/incompleta. Permanecem fora do corpus publicado e não são resultados de auditoria ou pentest.
-- Links relativos, sete seções do formato to-spec, dependências sem ciclos e correspondência entre mirrors e corpos publicados conferidos.
-- Busca por referências privadas específicas do contexto e padrões comuns de credenciais sem ocorrências nos padrões analisados. Isso não substitui a revisão de futuros exports.
-- Dezesseis issues relidas no GitHub: títulos, corpos e estados conferidos. Nove atualizadas e sete criadas; pesquisa inicial encerrada, quinze issues abertas. A entrega inicial permanece vinculada ao snapshot 0.1.
+## Contratos e exemplos
 
-A checagem de contratos usou Python, `jsonschema` e `referencing`, com resolução local dos schemas. Verifica estrutura e consistência documental; os exemplos continuam `illustrative`/`not_executed` e sem métricas.
+- Nove schemas conferidos como `JSON Schema Draft 2020-12`.
+- Dezoito cenários validados e referências resolvidas para 36 fontes públicas.
+- Nove famílias de ferramentas extraídas do prompt PentAGI fixado por commit.
+- Inventário permanece documentado, com disponibilidade instalada pendente de teste.
+- Seis eventos, um episódio e uma hipótese ilustrativa validados.
+- Escopo, contexto, artefatos e cadeia de hashes conferidos.
+- Vinte combinações inválidas rejeitadas, incluindo sete casos do novo contrato de hipótese.
+- Links locais, seções da to-spec e correspondência da spec com a issue principal conferidos.
+- Busca por padrões de credenciais e referências privadas específicas sem ocorrências nos padrões analisados.
 
-Nenhuma ferramenta de pentest, plataforma PentAGI, skill de auditoria, aplicação ou agente foi executado. Não houve provisionamento cloud. Isolamento, autorização, validade operacional do escopo, autenticidade da coleta, independência efetiva do verificador, contenção e recuperação precisam de testes na implementação. Os schemas não comprovam a verdade de um achado nem a existência da evidência referenciada.
+Os contratos anteriores permanecem em 0.2. O novo contrato de hipótese usa 0.3; seus estados ilustrativos preservam ausência de execução.
+
+Os casos sintéticos de validação ficam fora do dataset publicado. Eles verificam formato e consistência, sem representar experimentos de segurança.
+
+## Linear e documentação
+
+- Projeto dedicado no time Mathai, com 18 tarefas e uma tarefa principal.
+- Títulos, descrições completas, estados e vínculos de parentesco conferidos por leitura de retorno.
+- Dezoito conjuntos de dependências conferidos, com grafo sem ciclos.
+- Todas as tarefas em Backlog; execução e avaliação permanecem futuras.
+- Textos novos e documentos alterados passaram no linter de linguagem simples, com perfil português e glossário do projeto.
+
+O [recibo do Linear](../planning/linear-backlog.json) registra identificadores e a data de verificação. As descrições mantêm critérios de aprendizado e evidência.
+
+O Linear normaliza a marcação de links. A comparação de conteúdo preservou o texto e normalizou apenas os delimitadores dos endereços.
+
+## Limites da checagem
+
+A validação usou Python, `jsonschema`, `referencing` e o linter da easy-to-read. A implementação futura deverá testar busca, integração e autorização efetivas.
+
+Isolamento, execução das ferramentas, conexão dos servidores, contenção e supervisão humana aguardam provas práticas. Os schemas verificam estrutura; a verdade de um achado exige evidência.
+
+O [modelo final](final-learning-report-template.md) conserva notas e parecer pendentes. O marco de domínio depende da avaliação humana definida no plano.

@@ -23,7 +23,9 @@
       ],
       "github_number": 2,
       "github_url": "https://github.com/MathBorgess/red-blue-field/issues/2",
-      "state_at_publication": "open"
+      "state_at_publication": "open",
+      "body_revision": "0.3",
+      "body_verified_on": "2026-10-20"
     },
     {
       "id": "RB-003",
@@ -205,6 +207,6 @@
   ],
   "published_on": "2026-10-18",
   "verified_on": "2026-10-18",
-  "revision": "0.2",
-  "revised_on": "2026-10-18"
+  "revision": "0.3",
+  "revised_on": "2026-10-20"
 }

@@ -1,10 +1,12 @@
 <!-- red-blue-field:RB-002 -->
 
-Revisão 0.2. A direção inclui pentest local/cloud, manipulação do agente interno e estudo dos limites de guardrails. As referências PentAGI e Cloudflare foram incorporadas como módulos e critérios de evidência. Publicar este plano não executa testes nem provisiona cloud.
+Revisão 0.3 · 20/10/2026. O [projeto no Linear](https://linear.app/borgesmathai/project/red-blue-field-cybersec-assistida-por-ia-308aa2d73299) e a [tarefa principal](https://linear.app/borgesmathai/issue/MAT-289/concluir-formacao-pratica-no-red-blue-field-e-validar-dominio-com) registram capacitação e novas entregas.
 
-A entrega inicial de pesquisa está na [issue #1](https://github.com/MathBorgess/red-blue-field/issues/1). A [spec canônica](https://github.com/MathBorgess/red-blue-field/blob/main/SPEC.md) e o [blueprint das referências](https://github.com/MathBorgess/red-blue-field/blob/main/docs/reference-blueprints.md) acompanham esta issue.
+O plano inclui ferramentas PentAGI, busca por hipóteses, servidores de ataque/defesa e avaliação humana. Os componentes aguardam implementação.
 
-## Fatias de entrega
+## Fatias técnicas anteriores
+
+API — interface de acesso ao serviço. MVP — produto mínimo viável. IAM — gestão de identidades e permissões.
 
 - [ ] [#3 — Fundação: executar episódio S01 em API real com escopo e evidência](https://github.com/MathBorgess/red-blue-field/issues/3)
 - [ ] [#4 — Agentes: laço transparente red/alvo e prompt injection S02](https://github.com/MathBorgess/red-blue-field/issues/4)
@@ -21,147 +23,169 @@ A entrega inicial de pesquisa está na [issue #1](https://github.com/MathBorgess
 - [ ] [#15 — Auditoria: cobertura e verificador independente inspirados na Cloudflare](https://github.com/MathBorgess/red-blue-field/issues/15)
 - [ ] [#16 — Comparação opcional: adaptador PentAGI com escopo e evidência comuns](https://github.com/MathBorgess/red-blue-field/issues/16)
 
-# red-blue-field — AI Pentest & Agentic Red Teaming Reference Lab
+# red-blue-field — especificação de estudo e implementação
 
-Revisão **0.2 · 18/10/2026**. Estado: plano de implementação e estudo. A direção desta revisão foi solicitada pelo usuário: usar agentes para pentest tradicional e cloud, alterar o comportamento do agente interno e estudar limites de guardrails e de capacidade ofensiva. Os componentes continuam não implementados.
+Revisão **0.3 · 20/10/2026**. Estado: plano e contratos. Aplicação, agentes e servidores ainda aguardam implementação.
 
 ## Problem Statement
 
-Queremos aprender, com profundidade prática, como construir agentes e usá-los em avaliações de segurança. Precisamos tanto comprometer serviços e configurações deliberadamente vulneráveis do laboratório quanto manipular agentes que escolhem ferramentas, persistem memória e executam ações.
+Queremos aprender segurança com agentes de inteligência artificial. O estudo deve ligar hipótese, ferramenta, efeito, defesa e decisão humana.
 
-Um teste de prompt isolado não explica a passagem entre modelo, API, banco, IAM e rede. Um scanner executado por script também não demonstra que o agente descobriu a falha ou construiu uma cadeia. O projeto deve tornar observáveis essas diferenças e permitir comparar tentativas, defesas e recuperação.
+Precisamos distinguir descoberta de falha, execução de roteiro e alegação sem prova. O estudante deverá explicar o mecanismo e reproduzir os resultados.
 
-O produto principal é compreensão demonstrável: reproduzir o mecanismo, explicar a causa, apresentar evidências, corrigir e testar novamente. Dataset, traces e estudos técnicos são parte de cada entrega.
+O aprendizado inclui serviços tradicionais, comportamento de agentes e recursos cloud próprios. A avaliação precisa preservar tarefas legítimas e reconhecer evidência insuficiente.
 
 ## Solution
 
-Transformar red-blue-field em um laboratório de referência com três frentes:
+Construir o FieldDesk, aplicação fictícia com dois clientes isolados, documentos, banco e assistente interno. Acrescentar serviços vulneráveis e recursos cloud efêmeros.
 
-| Frente | Ator ofensivo e alvo | Resultado estudado |
-| --- | --- | --- |
-| Pentest com agentes | Pessoa, script ou agente red contra APIs, banco, execução local e configuração cloud próprios. | Descoberta, confirmação de falha, acesso e efeito efetivo nos serviços. |
-| Agentic red teaming | Red contra o assistente interno, ferramentas, memória e fluxo de supervisão. | Desvio de objetivo, uso indevido de ferramentas, persistência da influência e autonomia excessiva. |
-| Híbrida | Red encadeia uma falha de serviço com manipulação de agente ou uma ação cloud indevida. | Caminho completo, privilégio usado, efeito final, detecção e contenção. |
+| Frente | Alvo e prova |
+| --- | --- |
+| Pentest com agentes | Serviços, banco e permissões; confirmar acesso ou execução indevida no alvo. |
+| Agentic red teaming | Objetivo, ferramentas, memória e autonomia; observar desvio e efeito por camada. |
+| Cadeia híbrida | Serviço, agente e cloud; comprovar cada transição e identidade. |
 
-O FieldDesk será a aplicação fictícia central, com dois tenants, tickets, documentos, pedidos e operações administrativas. A arena incluirá serviços vulneráveis executáveis, banco sintético, worker descartável para provas de execução e recursos cloud efêmeros. O blue team será separado do assistente interno.
+Entregar dois servidores do Model Context Protocol (MCP). Esse protocolo conecta ferramentas aos agentes do usuário.
 
-Progredir de replay para serviço local real, emulação cloud e cloud real. Comparar execução manual, script e agente com ferramentas e informação inicial equivalentes. Comparar também quatro perfis de defesa, mantendo a contenção externa constante.
+O servidor red oferecerá pentest e testes adversariais de agentes. O servidor blue oferecerá investigação, defesa, contenção e recuperação.
+
+Uma hipótese inicial poderá vir da OWASP — comunidade que publica guias de segurança. Evidências avaliadas poderão originar hipóteses filhas.
+
+A busca seguirá cada ramo em profundidade, com orçamento e controle externo de escopo. O relatório final avaliará aprendizado e supervisão humana.
 
 ## User Stories
 
-1. Como estudante, quero construir um agente simples antes de atacá-lo, para compreender o laço entre objetivo, ferramentas e estado.
-2. Como estudante, quero explicar identidade, agência e autonomia, para distinguir capacidade concedida de liberdade de decisão.
-3. Como estudante, quero executar uma avaliação manual, para estabelecer uma referência compreensível.
-4. Como estudante, quero repetir a tarefa com script e com agente, para medir o que a decisão do modelo acrescenta.
-5. Como pentester, quero descobrir serviços dentro de um inventário autorizado, para levantar uma superfície verificável.
-6. Como pentester, quero testar autenticação e autorização de APIs, para confirmar acesso indevido com evidência.
-7. Como pentester, quero verificar uma falha de entrada que alcance o banco sintético, para entender seu efeito real.
-8. Como pentester, quero provar execução em worker descartável por um marcador inofensivo, para distinguir execução confirmada de alegação.
-9. Como pentester cloud, quero observar permissões efetivas de uma identidade de teste, para comparar intenção e capacidade.
-10. Como pentester cloud, quero testar configurações de IAM, armazenamento e rede do laboratório, para identificar excesso de privilégio e exposição interna.
-11. Como operador, quero observar a indisponibilidade controlada de um serviço e sua recuperação, para medir integridade e disponibilidade.
-12. Como red team, quero induzir desvio observável de tarefa no agente interno, para medir goal hijacking.
-13. Como red team, quero variar instruções diretas, documentos e metadados, para comparar superfícies.
-14. Como red team, quero manipular uma memória entre sessões controladas, para estudar persistência da influência.
-15. Como red team, quero observar loops e crescimento de ações, para testar limites de autonomia e orçamento.
-16. Como red team, quero testar uma API de configuração do agente, para estudar o vínculo entre segurança do serviço e comportamento.
-17. Como red team, quero encadear serviço, agente e cloud, para verificar cada fronteira atravessada.
-18. Como red team, quero receber apenas o feedback permitido, para evitar vantagem indevida de informação.
-19. Como pesquisador, quero identificar tentativas que apenas repetem um roteiro conhecido, para não atribuir descoberta ao modelo.
-20. Como pesquisador, quero testar variantes reservadas e casos sem solução no escopo, para medir generalização e honestidade do relatório.
-21. Como blue team, quero receber sinais autenticados do alvo e das ferramentas, para investigar com proveniência.
-22. Como blue team, quero conter sessão, processo, documento ou capacidade de teste, para limitar o efeito observado.
-23. Como blue team, quero detectar alterações de IAM e rede, para comparar configuração antes e depois.
-24. Como blue team, quero preservar o registro de um efeito parcial, para não encobrir dano durante recuperação.
-25. Como revisor humano, quero analisar a operação exata e seu contexto, para decidir antes do efeito.
-26. Como revisor humano, quero que alteração de parâmetros invalide meu aceite, para impedir reaproveitamento.
-27. Como operador, quero congelar escopo, recursos e permissões, para executar um episódio limitado.
-28. Como operador, quero uma interrupção fora dos agentes, para encerrar tentativas persistentes.
-29. Como operador, quero preparar e destruir recursos cloud por um controlador separado, para preservar a fronteira externa.
-30. Como operador, quero verificar os limites do provedor e estimar custos, para planejar uma execução real.
-31. Como avaliador, quero conferir resposta, processo, banco e estado cloud, para distinguir alegação de efeito.
-32. Como avaliador, quero separar desvio de comportamento, compromisso de serviço e drift de configuração, para produzir rótulos úteis.
-33. Como avaliador, quero identificar a camada de bloqueio, para estudar os limites de cada controle.
-34. Como pesquisador, quero realizar ablações de guardrails, para evitar atribuir proteção à camada errada.
-35. Como pesquisador, quero comparar eficácia com orçamento equivalente, para estudar limites do ataque com agentes.
-36. Como pesquisador, quero registrar falhas, recusas, consumo e intervenção, para calcular denominadores e custo completo.
-37. Como pesquisador, quero diferenciar emulação de cloud e serviço real, para limitar as conclusões.
-38. Como estudante, quero comparar um agente simples com um adaptador de framework, para aprender sem esconder mecanismos.
-39. Como estudante, quero usar Agentic Radar, AgentDojo e Agent-SafetyBench em seus papéis específicos, para avaliar cobertura e limitações.
-40. Como mantenedor, quero proteger coletor, escopo e avaliador, para manter a independência da evidência.
-41. Como leitor, quero reproduzir uma falha e a correção em laboratório, para verificar o estudo.
-42. Como autor, quero produzir de cinco a dez estudos com artefatos reais, para construir portfólio verificável.
-43. Como autor, quero preservar resultados negativos e limites, para comunicar descobertas com precisão.
-44. Como responsável pelo projeto, quero encerrar cada módulo com explicação, prova, correção e reteste, para demonstrar aprendizado.
-45. Como estudante, quero construir planejamento, execução e memória observáveis inspirados no PentAGI, para explicar decisões e comparar capacidade ofensiva.
-46. Como auditor, quero inventariar código e cobertura e validar achados independentemente, para separar suspeita, prova e falso positivo.
-47. Como pesquisador, quero comparar black box, gray box e white box, para medir o efeito da informação disponível.
+1. Como estudante, quero explicar o ciclo do agente, para compreender suas decisões.
+2. Como estudante, quero repetir testes manualmente, para verificar meu domínio.
+3. Como estudante, quero comparar script e agente, para medir sua contribuição.
+4. Como pentester, quero inventariar serviços permitidos, para definir hipóteses.
+5. Como pentester, quero testar autorização, para confirmar isolamento entre clientes.
+6. Como pentester, quero provar acesso indevido ao banco, para explicar a causa.
+7. Como pentester, quero confirmar execução limitada, para distinguir efeito de relato.
+8. Como estudante, quero entender cada ferramenta do PentAGI, para escolher testes adequados.
+9. Como red, quero testar documentos e ferramentas, para observar desvio do agente.
+10. Como red, quero testar memória, para medir influência entre tarefas.
+11. Como red, quero testar autonomia, para observar repetição e revogação.
+12. Como red, quero encadear hipóteses, para investigar evidências novas.
+13. Como red, quero registrar refutação, para abandonar caminhos sem suporte.
+14. Como pesquisador, quero limitar a profundidade, para tornar campanhas comparáveis.
+15. Como pesquisador, quero separar conhecimento prévio, para medir descoberta.
+16. Como usuário, quero conectar o MCP red, para avaliar meus sistemas autorizados.
+17. Como usuário, quero conectar o MCP blue, para investigar e conter incidentes.
+18. Como operador, quero separar identidades red e blue, para limitar cada papel.
+19. Como operador, quero emitir escopo, para restringir recursos e ações.
+20. Como operador, quero interromper processos, para encerrar ações persistentes.
+21. Como blue, quero observar sinais autenticados, para investigar com origem verificável.
+22. Como blue, quero conter sessões e ferramentas, para limitar o incidente.
+23. Como blue, quero restaurar recursos, para medir recuperação e perdas residuais.
+24. Como revisor, quero examinar a ação exata, para decidir antes do efeito.
+25. Como revisor, quero invalidar parâmetros alterados, para preservar minha decisão.
+26. Como estudante, quero estudar permissões cloud, para comparar intenção e capacidade efetiva.
+27. Como avaliador, quero conferir estado e registros, para classificar efeitos.
+28. Como auditor, quero verificar achados independentemente, para reduzir falsos positivos.
+29. Como pesquisador, quero registrar custo e falhas, para publicar denominadores completos.
+30. Como mantenedor, quero proteger a coleta, para preservar a evidência.
+31. Como estudante, quero resolver casos inéditos, para demonstrar transferência do aprendizado.
+32. Como estudante, quero documentar intervenções humanas, para justificar decisões críticas.
+33. Como estudante, quero receber avaliação humana, para identificar lacunas e retestes.
+34. Como autor, quero publicar estudos verificáveis, para construir portfólio.
 
 ## Implementation Decisions
 
-**Direção confirmada:** repositório público; aplicação própria; agentes red e blue; pentest de serviços e cloud; manipulação do agente interno; estudo de guardrails, capacidade ofensiva e defesa; dataset e traces de todos os episódios. Esta revisão altera o plano, sem iniciar pentest ou provisionamento.
+Os requisitos abaixo registram o desenho pedido. Sua implementação pertence ao backlog.
 
-**Desenho proposto:**
+| Decisão | Contrato |
+| --- | --- |
+| Ferramentas | Adotar o inventário documentado do PentAGI por etapas, com versões, disponibilidade e perfis verificados. |
+| MCP red e blue | Entregar servidores instaláveis, configuração de conexão, identidade por papel e contratos de entrada/saída. |
+| Hipóteses | Usar busca em profundidade limitada, origem de evidência, deduplicação e fila de ramos pendentes. |
+| Aprendizado | Exigir prática manual, assistida e inédita; registrar avaliação humana e lacunas. |
+| Encerramento | Produzir documento final de aprendizado, supervisão e intervenção humana, vinculado aos episódios. |
+| Tracker | Usar o Linear para capacitação e novos requisitos; manter links para as issues técnicas existentes no GitHub. |
 
-- Separar plano de controle, arena alvo, workers ofensivos, assistência interna, blue, broker, coletor e avaliador. O red não administra a infraestrutura externa que o contém.
-- Manter o FieldDesk e acrescentar API/banco vulneráveis, serviço de prova de execução e adaptadores de recursos cloud. A falha do alvo pode produzir um efeito real dentro do laboratório.
-- Usar quatro ambientes explícitos: replay local, serviço local real, emulação cloud e cloud real. Emulação não valida semântica ou permissões da AWS.
-- Usar três modos ofensivos: manual, script e agente; no agente, distinguir assistência de autonomia limitada. Ferramentas, informação inicial e orçamento devem ser comparáveis.
-- Preservar S01–S10 e acrescentar S11–S18 para banco, execução local, IAM/armazenamento, rede, disponibilidade e cadeias híbridas. Memória e autonomia entram no currículo principal após a fundação; propagação em grafo permanece estudo opcional.
-- Congelar um contrato de escopo com recursos, identidades, ações, destinos, prazo, limites e recuperação. Só a identidade de controle emite ou substitui esse contrato.
-- Permitir shell e ferramentas de pentest apenas no worker específico de VM/microVM da etapa correspondente. O serviço alvo e o executor não recebem shell do host, diretório pessoal ou credencial de administração do laboratório.
-- Manter separado o controle sob teste e o limite externo. Uma política intencionalmente fraca pode ser atacada; coletor, avaliador e recursos fora do episódio permanecem protegidos.
-- Comparar perfis A/B/C/D para defesa e uma dimensão independente de ablação para prompt, filtro do modelo, política de ferramentas, autorização do serviço e composição.
-- Separar desvio comportamental, ferramenta proposta, ferramenta executada, acesso confirmado, execução comprovada, mudança de configuração, indisponibilidade e restauração. Uma recusa do modelo não demonstra resistência do serviço.
-- Criar primeiro um agente pequeno e transparente, depois um adaptador CrewAI. Avaliar AgentCore como integração gerenciada após os experimentos locais; não pressupor disponibilidade ou gratuidade de serviços gerenciados.
-- Usar Radar para inventário/análise e testes suportados; AgentDojo para prompt injection; Agent-SafetyBench para avaliação de segurança comportamental. Cada integração congela revisão, licença e capacidades efetivamente usadas.
-- Preparar recursos cloud em conta sandbox separada, com região e IDs exatos, sessões temporárias e permissões verificadas por ação. Controles de escopo não dependerão somente de nomes ou tags.
-- Registrar trilha de ferramentas e auditoria de aplicação, banco, processo e cloud. Eventos de dados e logs de banco serão configurados quando necessários; não presumir que logs administrativos cubram todos os acessos.
-- Fazer restauração e teardown pelo controlador, conservando drift e dano residual no relatório. Alertas de orçamento cloud não são tratados como teto absoluto de faturamento.
-- Produzir releases incrementais por frente e ambiente, com casos reservados por linhagem. O piloto de quatro cenários continua uma calibração da frente agêntica, não cobertura de todo o projeto.
-- Planejar oito estudos técnicos; cada um exige um episódio medido, evidência, causa, defesa, reteste e limitações. A publicação em redes externas depende de pedido específico.
-- Usar [PentAGI e Cloudflare security-audit-skill como referências de construção](https://github.com/MathBorgess/red-blue-field/blob/main/docs/reference-blueprints.md): planejador/runner/memória/telemetria para pentest; cobertura, rastreio de código e verificador independente para auditoria. A integração comparativa do PentAGI é opcional e posterior ao runner próprio.
-- Versionar `coverage-ledger.json` e `findings.jsonl` com o contexto de acesso e a revisão auditada. Achado confirmado exige prova; suspeita sem verificação permanece no ledger. `needs_validation` exige verificação independente e condição decisiva pendente; não recebe severidade.
+O [inventário PentAGI](https://github.com/MathBorgess/red-blue-field/blob/main/docs/pentagi-tools.md) distingue ferramentas documentadas de ferramentas instaladas. O terminal pertence ao executor isolado da etapa local.
+
+O [contrato MCP](https://github.com/MathBorgess/red-blue-field/blob/main/docs/mcp-red-blue.md) define operações, autorização e provas de conexão. O servidor aplica permissões em cada chamada.
+
+A [busca por hipóteses](https://github.com/MathBorgess/red-blue-field/blob/main/docs/hypothesis-search.md) separa observação, inferência e achado. Uma categoria de risco orienta a investigação; sua presença exige teste.
+
+Preservar S01–S18 e seus oráculos. Memória e autonomia pertencem ao núcleo; propagação em grafo lógico permanece opcional.
+
+| Dimensão | Valores e interpretação |
+| --- | --- |
+| Ambiente | Replay, serviço local real, emulação cloud e cloud real; conclusões separadas. |
+| Ator ofensivo | Manual, script, agente assistido e autonomia limitada. |
+| Acesso | Black box, gray box e white box: informação externa, parcial e código autorizado. |
+| Defesa | A: vulnerável; B: controles determinísticos; C: B com blue; D: C com revisão. |
+| Ablação | Variar uma proteção interna por vez; manter contenção externa constante. |
+
+A identidade de controle provisiona, emite escopo e encerra episódios. Red, alvo e blue operam com capacidades separadas.
+
+O contrato fixa recursos, identidades, ações, destinos, prazo, orçamento e recuperação. Recursos descobertos permanecem candidatos até confirmação pelo controlador.
+
+O broker conserva credenciais de modelo e cloud. Somente o coletor grava evidência canônica; participantes produzem artefatos candidatos.
+
+Revisão humana vincula operação, parâmetros, identidade, versão, prazo e uso único. O executor consome a decisão junto ao efeito, com idempotência.
+
+O blue recebe sinais próprios, sem respostas reservadas do avaliador. Contenção usa ações previstas e preserva evidências anteriores.
+
+Manter agente próprio antes dos adaptadores CrewAI e PentAGI. Radar, AgentDojo e Agent-SafetyBench conservam seus critérios e resultados separados.
+
+A etapa cloud usa conta sandbox, recursos exatos, sessões temporárias e política atual do provedor. Verificar custos, auditoria, restauração e remoção dos recursos.
+
+Avaliar AgentCore quando necessário. A documentação consultada trata Bedrock Agents Classic como serviço fechado a novos clientes.
+
+Cada episódio gera manifesto, escopo, eventos, efeitos e veredito. A revisão acrescenta hipóteses, histórico de intervenção e avaliação de aprendizagem.
 
 ## Testing Decisions
 
-A fronteira principal é o **episódio completo**: escopo, tarefa, estado inicial, modo ofensivo, perfil e orçamento resultam em efeitos observados, evidência e veredito. Essa interface continua proposta para revisão; não é condição para concluir esta atualização documental.
+A fronteira principal continua o episódio completo. O avaliador verifica resposta, banco, processo e estado cloud, conforme o cenário.
 
-Um bom teste verifica comportamento externo e estado: acesso entre tenants, canary no banco, marcador de execução na VM alvo, operação IAM realmente efetiva, regra de rede alterada e alcance observado, memória influenciando a tarefa seguinte ou serviço recuperado. Capturas de tela e relatos do modelo complementam a prova, sem defini-la.
+Os testes dos servidores também verificarão o protocolo e a autorização. Anotações de ferramenta descrevem comportamento; o servidor decide a permissão.
 
-Testes menores cobrem propriedades críticas: consumo atômico de aprovação, idempotência, resolução de escopo, revalidação de destinos, interrupção, autenticidade de eventos e coleta incompleta. As fontes de referência são WSTG/API Security, AgentDojo e os oráculos do próprio laboratório; não há aplicação existente já testada para reaproveitar.
+| Critério de aceitação | Prova exigida |
+| --- | --- |
+| Fundação | Tarefa legítima e violação conhecida com efeito conferido no alvo. |
+| Pentest local | Canary protegido e marcador inofensivo de execução, quando aplicável. |
+| Ferramentas | Versão, parâmetros, destino, saída, término e comparação manual/agente. |
+| Agente interno | Objetivo, ferramentas, memória e autonomia com controles benignos. |
+| Cloud | Identidade efetiva, mudança observada, auditoria, restauração e teardown. |
+| Cadeia híbrida | Evidência de cada transição serviço→agente→cloud. |
+| Hipóteses | Ramo com três níveis, hipótese refutada, ciclo deduplicado e término por orçamento. |
+| Escopo | Nova hipótese preserva recursos e ações autorizados; bloqueio externo tem rótulo próprio. |
+| MCP red | Dois clientes compatíveis descobrem ferramentas e completam teste local auditável. |
+| MCP blue | Dois clientes investigam sinal e executam contenção reversível auditável. |
+| Separação de papéis | Identidade red falha ao chamar contenção blue; blue mantém suas permissões específicas. |
+| Supervisão | Ação aceita, recusada, alterada e expirada; decisão humana antes do efeito. |
+| Coleta | Falha suspende novas ações; efeito sem reconciliação permanece desconhecido. |
+| Auditoria | Verificador distinto confirma ou rejeita alegações; cobertura pendente permanece visível. |
+| Aprendizado | Casos inéditos, execução manual, explicação, correção e reteste avaliados por pessoa responsável. |
+| Documento final | Evidências, intervenções, rubrica, lacunas e decisão humana por competência. |
 
-Critérios de aceitação:
+Separar famílias de desenvolvimento e avaliação. Resetar memória entre famílias; preservar memória somente quando for a variável estudada.
 
-1. Uma tarefa legítima e uma violação conhecida são reproduzíveis, com o efeito conferido no alvo.
-2. Pentest local confirma ao menos acesso a dado protegido e, na etapa de execução, um marcador inofensivo no worker alvo; um roteiro fixo não é apresentado como descoberta autônoma.
-3. Pentest cloud selecionado demonstra permissões e mudanças nos recursos do sandbox, com auditoria, restauração e teardown verificados.
-4. Desvio de objetivo, tool misuse, memória contaminada e loops têm cenário positivo, controle benigno e evidência do mecanismo.
-5. Uma cadeia híbrida registra cada transição serviço→agente→cloud e a identidade usada.
-6. Uma ablação altera um controle de cada vez e informa se a contenção externa impediu observar a falha do controle interno.
-7. B/C identifica a contribuição adicional do blue; C/D mede revisão de uma operação exata.
-8. Manual/script/agente compartilham o escopo e declaram diferenças de informação e ferramentas.
-9. Recusa, falha de ferramenta, erro de infraestrutura e limite de orçamento têm classificações distintas.
-10. O red e o alvo não alteram escopo, coletor ou oráculo; tentativa fora do contrato termina no controle externo.
-11. Recuperação restaura o serviço e mantém exposições e perdas residuais registradas.
-12. Exportação valida contratos, referências, checksums e redação; dados ilustrativos, emulação e cloud real permanecem distinguíveis.
-13. Cada módulo deixa uma explicação do mecanismo, uma correção, um reteste e uma pergunta em aberto.
-14. O portfólio contém apenas estudos apoiados em execuções e deixa explícito o que não foi demonstrado.
-15. Uma auditoria white box discrimina achado confirmado, rejeitado e condição pendente, com cobertura incompleta visível e verificador distinto do descobridor.
-16. O planejador liga objetivo, hipótese, ações e observações; uma comparação com PentAGI explicita diferenças de ferramentas, acesso e exportação, sem converter uma narrativa em prova.
+Usar controles benignos, casos sem falha e tarefas impossíveis no escopo. Publicar falhas, recusas, custos e resultados desconhecidos.
+
+O piloto S01–S04 continua exploratório. Lotes locais, cloud e híbridos terão tamanho e orçamento congelados antes da execução.
 
 ## Out of Scope
 
-Produção ou recursos de terceiros sem autorização; ataque à infraestrutura do provedor; dados pessoais reais; credenciais permanentes nos participantes; propagação autônoma fora do laboratório; malware persistente; testes volumétricos e DoS em cloud no desenho padrão; alteração do controle externo pelos agentes.
+O contrato limita a atuação a sistemas próprios ou formalmente autorizados. A infraestrutura do provedor permanece fora do alvo.
 
-Provas de execução e ações destrutivas limitadas pertencem às etapas locais/recursos efêmeros definidos no contrato. A indisponibilidade em cloud será estudada por falha de configuração ou injeção controlada de falha compatível com o provedor. Treinamento e autopromoção de políticas ficam para estudo posterior.
+O desenho padrão exclui dados pessoais reais, credenciais permanentes nos participantes, propagação externa, persistência maliciosa e testes volumétricos cloud.
+
+O inventário registra categorias avançadas do PentAGI como referência. Sua inclusão documental preserva as etapas e permissões definidas para cada exercício.
+
+O encerramento avaliará competências demonstradas. Formação em outras especialidades e experiência profissional exigirão prática adicional.
 
 ## Further Notes
 
-Esta revisão mantém o formato da skill [to-spec](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/to-spec/SKILL.md). A discussão está na [issue #2](https://github.com/MathBorgess/red-blue-field/issues/2). Publicar o plano e o backlog não inicia os experimentos.
+Esta revisão mantém as sete seções da [to-spec](https://github.com/mattpocock/skills/blob/49dd158d1076134a641b33efb035946536778336/skills/engineering/to-spec/SKILL.md).
 
-A matriz AWS para agentes distingue agência e autonomia; seus quatro escopos não equivalem aos perfis A/B/C/D deste projeto. A seleção de framework e serviço usará documentação atual. Bedrock Agents Classic é referência histórica para novos projetos; verificar AgentCore na etapa gerenciada.
+O [plano de aprendizagem](https://github.com/MathBorgess/red-blue-field/blob/main/docs/learning-assessment.md) define a avaliação. O [modelo do documento final](https://github.com/MathBorgess/red-blue-field/blob/main/docs/final-learning-report-template.md) permanece sem resultados medidos.
 
-A motivação de carreira fornecida pelo usuário orienta as competências. A previsão de demanda entre 2026 e 2030 não foi validada como estatística nesta pesquisa, e não será tratada como resultado do laboratório.
+O [backlog no Linear](https://github.com/MathBorgess/red-blue-field/blob/main/docs/linear-backlog.md) registra tarefas e dependências. As issues históricas do GitHub conservam o contexto técnico anterior.
 
-Conta cloud, recursos concretos, orçamento e regras aplicáveis serão definidos na preparação da etapa correspondente. Esta revisão não executou ataques, não provisionou serviços e não incorreu em custos de modelo do experimento.
+A especificação do produto está em 0.3. Os oito contratos de evidência anteriores permanecem em 0.2; o novo contrato de hipótese usa 0.3.
+
+Publicar o plano registra requisitos. Execuções, conexões MCP e validação de competências pertencem às entregas futuras.
