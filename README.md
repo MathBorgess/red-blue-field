@@ -28,6 +28,89 @@ Os [chats Red e Blue](docs/terminal-agents.md) usam Deep Agents e sua proxy loca
 
 Eles incluem prompts editáveis, planos visíveis e logs separados de mensagens, ferramentas, latência e tokens informados.
 
+## Dois terminais: Red e Blue
+
+Instale os chats no ambiente virtual e gere a configuração privada, caso ela ainda esteja ausente:
+
+```bash
+. .venv/bin/activate
+pip install -e '.[chat]'
+test -f .env || rbf init
+```
+
+`rbf init` cria `.env` a partir de [.env.example](.env.example), com tokens aleatórios. Se `.env` já existe, preserve seus tokens.
+
+Nesse arquivo, preencha `RBF_CODEX_MODEL` com um modelo disponível na sua conta. Confira `RBF_CODEX_PROXY_URL` e `RBF_FIELD_URL`.
+
+Mantenha o Field via Docker Compose e sua proxy Codex em execução. Os chats leem `.env` como configuração, sem executar shell.
+
+No terminal Red:
+
+```bash
+python scripts/red_teamer.py --verbose
+```
+
+O Red cria um episódio, mostra `RUN_ID=...` e salva o identificador em `artifacts/private/active-run.json`.
+
+No terminal Blue:
+
+```bash
+python scripts/blue_teamer.py --verbose
+```
+
+O Blue lê o mesmo arquivo e confere o episódio no servidor. As conversas ficam separadas.
+
+## Consultar e escolher o run_id
+
+O `run_id` identifica um episódio. Cada novo episódio recebe seu próprio valor; `.env.example` conserva esse campo vazio.
+
+Para consultar o identificador selecionado:
+
+```bash
+python -m json.tool artifacts/private/active-run.json
+```
+
+Para escolher um episódio específico:
+
+```bash
+python scripts/red_teamer.py --run-id IDENTIFICADOR --verbose
+python scripts/blue_teamer.py --run-id IDENTIFICADOR --verbose
+```
+
+Troque `IDENTIFICADOR` pelo valor real mostrado pelo Red. `--run-id` tem prioridade sobre `RBF_RUN_ID` e o arquivo local.
+
+O Red cria um episódio quando `RBF_RUN_ID` fica vazio. O Blue consulta o arquivo local quando falta uma seleção explícita.
+
+Cada seleção Red atualiza o arquivo local. Para experimentos simultâneos, escolha `--run-id` ou arquivos distintos com `--run-file CAMINHO`.
+
+Episódios encerrados permanecem disponíveis no painel para consulta. Crie outro episódio para continuar os testes.
+
+## Comandos e experimentos
+
+| Comando | Efeito |
+| --- | --- |
+| `/allow` | Habilita ações somente para a próxima mensagem. |
+| `/metrics` | Mostra chamadas, tokens informados, latências e erros da sessão. |
+| `/reset` | Limpa a memória da conversa; preserva logs e alvo. |
+| `/finish` | Conclui o episódio e gera o dataset. Afeta ambos os terminais. |
+| `/stop` | Interrompe o episódio. Afeta ambos os terminais. |
+| `/quit` | Fecha o chat e preserva o prazo do episódio. |
+
+Para executar os dois roteiros, um após o outro:
+
+```bash
+python scripts/red_teamer.py --experiment --allow-actions --verbose
+python scripts/blue_teamer.py --experiment --allow-actions --verbose
+```
+
+Os logs ficam em `artifacts/private/chats/PAPEL/SESSAO/`. Eles incluem `session.json`, `events.jsonl`, `metrics.json`, `latest-request.json` e `latest-response.json`.
+
+Argumentos têm prioridade sobre variáveis exportadas; estas têm prioridade sobre `.env`. Use `--env-file CAMINHO` para selecionar outra configuração.
+
+O token exportado em `RBF_CONTROL_TOKEN` prevalece sobre o arquivo de token selecionado.
+
+Para uso por agentes, consulte o [guia de agentes](AGENTS.md). O [guia dos chats](docs/terminal-agents.md) explica prompts, ferramentas, evidências e limites.
+
 ## O que está pronto
 
 | Componente | Entrega |

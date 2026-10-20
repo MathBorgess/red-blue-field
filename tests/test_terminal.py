@@ -221,14 +221,22 @@ async def test_both_terminal_experiments_as_real_subprocesses(app, tmp_path):
         raise AssertionError('Local test server failed to start')
     try:
         field_url, proxy_url = serve(app), serve(proxy)
-        env = {**os.environ, 'RBF_CONTROL_TOKEN': app.state.lab.settings.control_token}
-        common = ['--model', 'test-codex-model', '--field-url', field_url, '--proxy-url', proxy_url + '/v1',
-                  '--log-dir', str(tmp_path / 'terminal'), '--experiment', '--allow-actions', '--verbose']
+        configured = {'RBF_CODEX_MODEL': 'test-codex-model', 'RBF_FIELD_URL': field_url,
+                      'RBF_CODEX_PROXY_URL': proxy_url + '/v1', 'RBF_RUN_ID': '',
+                      'RBF_RUN_FILE': str(tmp_path / 'selected-run.json'), 'RBF_CHAT_LOG_DIR': str(tmp_path / 'terminal')}
+        config = tmp_path / 'terminal.env'
+        config.write_text(''.join(key + '=' + value + '\n' for key, value in configured.items()))
+        env = {k:v for k,v in os.environ.items() if k not in configured}
+        env['RBF_CONTROL_TOKEN'] = app.state.lab.settings.control_token
+        common = ['--env-file', str(config), '--experiment', '--allow-actions', '--verbose']
         root = Path(__file__).resolve().parent.parent
         red = subprocess.run([sys.executable, 'scripts/red_teamer.py', *common], cwd=root, env=env, capture_output=True, text=True, timeout=60)
         assert red.returncode == 0, red.stderr + red.stdout
         run_id = re.search(r'episódio ([a-f0-9]{32})', red.stdout).group(1)
-        blue = subprocess.run([sys.executable, 'scripts/blue_teamer.py', *common, '--run-id', run_id], cwd=root, env=env, capture_output=True, text=True, timeout=60)
+        selection = json.loads((tmp_path / 'selected-run.json').read_text())
+        assert selection['run_id'] == run_id
+        assert app.state.lab.settings.control_token not in json.dumps(selection)
+        blue = subprocess.run([sys.executable, 'scripts/blue_teamer.py', *common], cwd=root, env=env, capture_output=True, text=True, timeout=60)
         assert blue.returncode == 0, blue.stderr + blue.stdout
         assert counts == {'red': 5, 'blue': 4}
         for role in ['red', 'blue']:

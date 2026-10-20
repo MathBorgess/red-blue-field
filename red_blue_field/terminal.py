@@ -9,9 +9,11 @@ import os
 import re
 from importlib.metadata import version
 from pathlib import Path
+from io import StringIO
 from urllib.parse import urlsplit
 
 import httpx
+from dotenv import dotenv_values
 from deepagents import create_deep_agent, GeneralPurposeSubagentProfile, HarnessProfile, register_harness_profile
 from deepagents.backends import StateBackend
 from langchain.agents.middleware import AgentMiddleware, TodoListMiddleware
@@ -23,6 +25,7 @@ from langsmith import tracing_context
 from .evidence import atomic_json, digest
 from .terminal_logs import SessionLog
 from .terminal_tools import build_tools
+from .terminal_config import defaults, read_selected_run, save_selected_run
 
 VIRTUAL_TOOLS = {'write_todos', 'ls', 'read_file', 'write_file', 'edit_file', 'glob', 'grep'}
 
@@ -43,8 +46,8 @@ def load_control_token(path: Path) -> str:
     if not value:
         text = path.read_text().strip()
         # Accept an explicitly selected .env file; do not execute shell or read provider credentials.
-        if 'RBF_CONTROL_TOKEN=' in text:
-            value = next(line.split('=', 1)[1].strip().strip('"\'') for line in text.splitlines() if line.startswith('RBF_CONTROL_TOKEN='))
+        if re.search(r'(?m)^\s*(?:export\s+)?RBF_CONTROL_TOKEN\s*=', text):
+            value = dotenv_values(stream=StringIO(text), interpolate=False).get('RBF_CONTROL_TOKEN') or ''
         else:
             value = text
     if len(value) < 24 or '\n' in value:
@@ -96,18 +99,21 @@ def build_agent(role, model, tools, log, prompt, max_tools=8):
     return agent, boundary
 
 
-def arguments(role):
+def arguments(role, argv=None):
+    env_file, token_file, configured = defaults(argv)
     parser = argparse.ArgumentParser(description=f'Mini chat {role.upper()} via Deep Agents e proxy local do Codex')
-    parser.add_argument('--proxy-url', type=loopback_url, default=os.getenv('RBF_CODEX_PROXY_URL', 'http://127.0.0.1:8000/v1'))
-    parser.add_argument('--model', default=os.getenv('RBF_CODEX_MODEL'), required=not bool(os.getenv('RBF_CODEX_MODEL')),
+    parser.add_argument('--env-file', type=Path, default=env_file, help='Configuracao literal, sem executar shell ou expandir variaveis')
+    parser.add_argument('--proxy-url', type=loopback_url, default=configured('RBF_CODEX_PROXY_URL', 'http://127.0.0.1:8000/v1'))
+    parser.add_argument('--model', default=configured('RBF_CODEX_MODEL'), required=not bool(configured('RBF_CODEX_MODEL')),
                         help='Identificador concreto disponível na sua conta; sem aliases ou acesso ampliado')
-    parser.add_argument('--field-url', type=loopback_url, default='http://127.0.0.1:8080')
-    parser.add_argument('--control-token-file', type=Path, default=Path('artifacts/private/control-token'))
-    parser.add_argument('--run-id', type=lambda value: value if re.fullmatch('[a-f0-9]{32}', value) else parser.error('Invalid run ID'))
+    parser.add_argument('--field-url', type=loopback_url, default=configured('RBF_FIELD_URL', 'http://127.0.0.1:8080'))
+    parser.add_argument('--control-token-file', type=Path, default=token_file)
+    parser.add_argument('--run-id', default=configured('RBF_RUN_ID'))
+    parser.add_argument('--run-file', type=Path, default=Path(configured('RBF_RUN_FILE', 'artifacts/private/active-run.json')))
     parser.add_argument('--scenario', default='S01', choices=[f'S{i:02}' for i in range(1, 19)])
     parser.add_argument('--profile', default='A', choices=list('ABCD'))
     parser.add_argument('--system-prompt', type=Path, default=Path(__file__).parent / 'prompts' / (role + '_terminal.md'))
-    parser.add_argument('--log-dir', type=Path, default=Path('artifacts/private/chats'))
+    parser.add_argument('--log-dir', type=Path, default=Path(configured('RBF_CHAT_LOG_DIR', 'artifacts/private/chats')))
     parser.add_argument('--max-model-calls', type=int, default=40)
     parser.add_argument('--max-reported-tokens', type=int, default=100000)
     parser.add_argument('--max-tool-calls', type=int, default=8, help='Por turno, incluindo planejamento e arquivos virtuais')
@@ -117,7 +123,7 @@ def arguments(role):
     parser.add_argument('--experiment', action='store_true', help='Executar o experimento do papel e encerrar o chat')
     parser.add_argument('--verbose', action='store_true', help='Mostrar chamadas, ferramentas e mudanças do plano no terminal')
     parser.add_argument('--prompt', help='Executar uma mensagem e encerrar o chat')
-    result = parser.parse_args()
+    result = parser.parse_args(argv)
     # argparse does not consistently apply type validators to values supplied through environment defaults.
     result.proxy_url, result.field_url = loopback_url(result.proxy_url), loopback_url(result.field_url)
     for name in ['max_model_calls', 'max_reported_tokens', 'max_tool_calls', 'turn_timeout', 'episode_seconds']:
@@ -126,7 +132,12 @@ def arguments(role):
     if result.episode_seconds > 3600:
         parser.error('--episode-seconds must be at most 3600')
     if role == 'blue' and not result.run_id:
-        parser.error('Blue requires --run-id from the Red terminal or the Field dashboard')
+        try:
+            result.run_id = read_selected_run(result.run_file, result.field_url)
+        except (OSError, ValueError, TypeError) as error:
+            parser.error('Blue needs --run-id, RBF_RUN_ID or a valid --run-file: ' + str(error))
+    if result.run_id and not re.fullmatch('[a-f0-9]{32}', result.run_id):
+        parser.error('Invalid run ID; expected 32 lowercase hexadecimal characters')
     return result
 
 
@@ -147,6 +158,8 @@ async def chat(role, args):
             raise ValueError('Attach a manual episode to avoid a second automatic planner')
         if value['status'] in {'complete', 'interrupted', 'invalid'}:
             raise ValueError('Episode is closed; create a new manual episode')
+        if role == 'red':
+            save_selected_run(args.run_file, args.field_url, value)
         log = SessionLog(args.log_dir, role, args.run_id, args.model, [token], max_calls=args.max_model_calls, max_tokens=args.max_reported_tokens)
         log.echo = args.verbose
         enabled = args.allow_actions
@@ -160,6 +173,7 @@ async def chat(role, args):
         (log.root / 'session.json').chmod(0o600)
         log.event('session.started', metadata)
         print(f'{role.upper()} · episódio {args.run_id}\nLogs: {log.root}\nAções: {"habilitadas" if enabled else "aguardam /allow"}')
+        print(f'RUN_ID={args.run_id}\nArquivo do episodio: {args.run_file}')
         print('Comandos: /help, /allow, /metrics, /reset, /finish, /stop, /quit. Sair preserva o episódio para o outro terminal.')
         try:
             async with httpx.AsyncClient(timeout=args.turn_timeout, trust_env=False, follow_redirects=False,

@@ -22,6 +22,14 @@ Escolha um identificador de modelo disponível na sua conta. Os scripts exigem e
 
 Os exemplos usam `SEU_MODELO_CODEX` como marcador. Troque esse texto pelo identificador real.
 
+Você pode configurar `RBF_CODEX_MODEL`, `RBF_CODEX_PROXY_URL` e `RBF_FIELD_URL` em `.env`, criado com `rbf init`.
+
+Os chats leem esse arquivo automaticamente, sem executar shell ou expandir variáveis. Argumentos prevalecem sobre ambiente exportado; este prevalece sobre `.env`.
+
+O token exportado em `RBF_CONTROL_TOKEN` prevalece sobre o arquivo de token selecionado.
+
+Com essa configuração, basta executar `python scripts/red_teamer.py --verbose`. Use `--env-file CAMINHO` para outro arquivo.
+
 ## Terminal Red
 
 Na raiz do repositório:
@@ -31,6 +39,8 @@ python scripts/red_teamer.py --model SEU_MODELO_CODEX --verbose
 ```
 
 O script cria um episódio manual S01, perfil A, com prazo de uma hora. Ele mostra o identificador do episódio.
+
+O Red também grava `artifacts/private/active-run.json`, conforme `RBF_RUN_FILE`. O arquivo contém a seleção do episódio, sem credenciais.
 
 Se o Field usa Docker Compose, selecione o arquivo `.env` explicitamente:
 
@@ -53,6 +63,12 @@ python scripts/blue_teamer.py --model SEU_MODELO_CODEX --run-id IDENTIFICADOR --
 Acrescente `--control-token-file .env` quando o Field usa o token desse arquivo.
 
 As conversas e memórias ficam separadas. Os agentes compartilham somente os efeitos e eventos do episódio configurado.
+
+Com `RBF_RUN_ID` vazio, o Blue pode ler o identificador salvo pelo Red. Nesse caso, execute `python scripts/blue_teamer.py --verbose`.
+
+Um `--run-id` explícito prevalece sobre `RBF_RUN_ID` e o arquivo local. O Blue também confere o servidor associado ao arquivo.
+
+Cada seleção Red atualiza o arquivo. Para experimentos simultâneos, use identificadores explícitos ou arquivos separados com `--run-file CAMINHO`.
 
 ## Controlar cada ação
 

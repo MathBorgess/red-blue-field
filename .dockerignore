@@ -1,6 +1,7 @@
 .git
 .venv
 .env*
+!.env.example
 artifacts
 tests
 research

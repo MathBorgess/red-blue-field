@@ -1,6 +1,6 @@
 FROM python:3.12-slim-bookworm
 WORKDIR /app
-COPY pyproject.toml README.md requirements.lock ./
+COPY pyproject.toml README.md requirements.lock .env.example ./
 COPY red_blue_field ./red_blue_field
 COPY schemas ./schemas
 COPY scenarios/catalog.json ./scenarios/catalog.json

@@ -8,7 +8,7 @@ import secrets
 from pathlib import Path
 
 from .api import create_app
-from .config import Settings
+from .config import Settings, resources
 from .evidence import verify_export
 from .models import RunRequest
 
@@ -30,7 +30,12 @@ def main():
     sub.add_parser('doctor')
     args = parser.parse_args()
     if args.command == 'init':
-        data = '\n'.join(f'{key}={secrets.token_urlsafe(32)}' for key in ['RBF_CONTROL_TOKEN', 'RBF_WORKER_A_TOKEN', 'RBF_WORKER_B_TOKEN']) + '\n'
+        template = resources() / '.env.example'
+        if not template.exists():
+            template = resources() / 'env.example'
+        tokens = {key: secrets.token_urlsafe(32) for key in ['RBF_CONTROL_TOKEN', 'RBF_WORKER_A_TOKEN', 'RBF_WORKER_B_TOKEN']}
+        data = '\n'.join(line.split('=', 1)[0] + '=' + tokens[line.split('=', 1)[0]]
+                         if line.split('=', 1)[0] in tokens else line for line in template.read_text().splitlines()) + '\n'
         descriptor = os.open(args.output, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         with os.fdopen(descriptor, 'w') as handle:
             handle.write(data)
