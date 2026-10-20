@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app.Dockerfile
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      RBF_CONTROL_TOKEN: ${RBF_CONTROL_TOKEN:?Run rbf init first}
+      RBF_WORKER_A_URL: http://worker-a:8080
+      RBF_WORKER_B_URL: http://worker-b:8080
+      RBF_WORKER_A_TOKEN: ${RBF_WORKER_A_TOKEN:?Run rbf init first}
+      RBF_WORKER_B_TOKEN: ${RBF_WORKER_B_TOKEN:?Run rbf init first}
+      RBF_MODEL_URL: ${RBF_MODEL_URL:-}
+      RBF_MODEL_NAME: ${RBF_MODEL_NAME:-}
+      RBF_MODEL_API_KEY: ${RBF_MODEL_API_KEY:-}
+      RBF_MODEL_INPUT_USD_PER_MILLION: ${RBF_MODEL_INPUT_USD_PER_MILLION:-}
+      RBF_MODEL_OUTPUT_USD_PER_MILLION: ${RBF_MODEL_OUTPUT_USD_PER_MILLION:-}
+    volumes: ["lab-data:/data"]
+    read_only: true
+    tmpfs: ["/tmp:size=64m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 128
+    mem_limit: 512m
+    cpus: 1
+    networks: [targets, broker]
+  worker-a: &worker
+    build:
+      context: .
+      dockerfile: docker/worker.Dockerfile
+    environment:
+      RBF_WORKER_PROFILE: A
+      RBF_WORKER_TOKEN: ${RBF_WORKER_A_TOKEN:?Run rbf init first}
+    read_only: true
+    tmpfs: ["/tmp:size=128m,mode=1777", "/proof:size=8m,uid=10001,gid=10001,mode=0700"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 384m
+    cpus: 0.5
+    networks: [targets]
+  worker-b:
+    <<: *worker
+    environment:
+      RBF_WORKER_PROFILE: B
+      RBF_WORKER_TOKEN: ${RBF_WORKER_B_TOKEN:?Run rbf init first}
+networks:
+  targets:
+    internal: true
+  broker: {}
+volumes:
+  lab-data: {}

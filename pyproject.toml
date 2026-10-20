@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "red-blue-field"
+version = "0.4.0"
+description = "Observable, scoped AI security reference laboratory"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn>=0.30,<1", "httpx>=0.27,<1",
+  "jsonschema>=4.23,<5", "referencing>=0.35,<1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10", "pytest-asyncio>=0.24,<2"]
+browser = ["playwright>=1.50,<2"]
+aws = ["boto3>=1.35,<2"]
+
+[project.scripts]
+rbf = "red_blue_field.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["red_blue_field"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"schemas" = "red_blue_field/data/schemas"
+"scenarios/catalog.json" = "red_blue_field/data/catalog.json"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+

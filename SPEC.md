@@ -1,6 +1,6 @@
 # red-blue-field — especificação de estudo e implementação
 
-Revisão **0.3 · 20/10/2026**. Estado: plano e contratos. Aplicação, agentes e servidores ainda aguardam implementação.
+Revisão **0.4 · 20/10/2026**. Estado: aplicação local executável, cenários e evidências. Os servidores de integração pertencem à próxima etapa.
 
 ## Problem Statement
 
@@ -12,7 +12,9 @@ O aprendizado inclui serviços tradicionais, comportamento de agentes e recursos
 
 ## Solution
 
-Construir o FieldDesk, aplicação fictícia com dois clientes isolados, documentos, banco e assistente interno. Acrescentar serviços vulneráveis e recursos cloud efêmeros.
+Construir o FieldDesk, aplicação fictícia com dois clientes isolados, documentos, banco e assistente interno. A etapa atual inclui serviços descartáveis e emulação cloud.
+
+O experimento funciona sem licença Daybreak ou acesso ampliado a modelos. Exercícios usam alvos locais próprios, dados sintéticos e escopo controlado.
 
 | Frente | Alvo e prova |
 | --- | --- |
@@ -20,7 +22,9 @@ Construir o FieldDesk, aplicação fictícia com dois clientes isolados, documen
 | Agentic red teaming | Objetivo, ferramentas, memória e autonomia; observar desvio e efeito por camada. |
 | Cadeia híbrida | Serviço, agente e cloud; comprovar cada transição e identidade. |
 
-Entregar dois servidores do Model Context Protocol (MCP). Esse protocolo conecta ferramentas aos agentes do usuário.
+Preparar os serviços internos para dois servidores do Model Context Protocol (MCP). Esse protocolo conecta ferramentas aos agentes do usuário.
+
+Conforme o pedido atual, os dois servidores ficam fora desta entrega. Seus contratos permanecem como requisito da etapa seguinte.
 
 O servidor red oferecerá pentest e testes adversariais de agentes. O servidor blue oferecerá investigação, defesa, contenção e recuperação.
 
@@ -67,12 +71,12 @@ A busca seguirá cada ramo em profundidade, com orçamento e controle externo de
 
 ## Implementation Decisions
 
-Os requisitos abaixo registram o desenho pedido. Sua implementação pertence ao backlog.
+O [estado da implementação](docs/implementation-status.md) descreve componentes, limites e próximos passos. O [guia de execução](docs/running-the-lab.md) explica como praticar.
 
 | Decisão | Contrato |
 | --- | --- |
 | Ferramentas | Adotar o inventário documentado do PentAGI por etapas, com versões, disponibilidade e perfis verificados. |
-| MCP red e blue | Entregar servidores instaláveis, configuração de conexão, identidade por papel e contratos de entrada/saída. |
+| MCP red e blue | Preservar contratos e serviços internos; construir os servidores na próxima etapa. |
 | Hipóteses | Usar busca em profundidade limitada, origem de evidência, deduplicação e fila de ramos pendentes. |
 | Aprendizado | Exigir prática manual, assistida e inédita; registrar avaliação humana e lacunas. |
 | Encerramento | Produzir documento final de aprendizado, supervisão e intervenção humana, vinculado aos episódios. |
@@ -80,7 +84,7 @@ Os requisitos abaixo registram o desenho pedido. Sua implementação pertence ao
 
 O [inventário PentAGI](https://github.com/MathBorgess/red-blue-field/blob/main/docs/pentagi-tools.md) distingue ferramentas documentadas de ferramentas instaladas. O terminal pertence ao executor isolado da etapa local.
 
-O [contrato MCP](https://github.com/MathBorgess/red-blue-field/blob/main/docs/mcp-red-blue.md) define operações, autorização e provas de conexão. O servidor aplica permissões em cada chamada.
+O [contrato MCP](https://github.com/MathBorgess/red-blue-field/blob/main/docs/mcp-red-blue.md) define operações, autorização e provas de conexão da próxima etapa.
 
 A [busca por hipóteses](https://github.com/MathBorgess/red-blue-field/blob/main/docs/hypothesis-search.md) separa observação, inferência e achado. Uma categoria de risco orienta a investigação; sua presença exige teste.
 
@@ -128,8 +132,8 @@ Os testes dos servidores também verificarão o protocolo e a autorização. Ano
 | Cadeia híbrida | Evidência de cada transição serviço→agente→cloud. |
 | Hipóteses | Ramo com três níveis, hipótese refutada, ciclo deduplicado e término por orçamento. |
 | Escopo | Nova hipótese preserva recursos e ações autorizados; bloqueio externo tem rótulo próprio. |
-| MCP red | Dois clientes compatíveis descobrem ferramentas e completam teste local auditável. |
-| MCP blue | Dois clientes investigam sinal e executam contenção reversível auditável. |
+| MCP red, etapa futura | Dois clientes compatíveis descobrem ferramentas e completam teste local auditável. |
+| MCP blue, etapa futura | Dois clientes investigam sinal e executam contenção reversível auditável. |
 | Separação de papéis | Identidade red falha ao chamar contenção blue; blue mantém suas permissões específicas. |
 | Supervisão | Ação aceita, recusada, alterada e expirada; decisão humana antes do efeito. |
 | Coleta | Falha suspende novas ações; efeito sem reconciliação permanece desconhecido. |
@@ -161,6 +165,6 @@ O [plano de aprendizagem](https://github.com/MathBorgess/red-blue-field/blob/mai
 
 O [backlog no Linear](https://github.com/MathBorgess/red-blue-field/blob/main/docs/linear-backlog.md) registra tarefas e dependências. As issues históricas do GitHub conservam o contexto técnico anterior.
 
-A especificação do produto está em 0.3. Os oito contratos de evidência anteriores permanecem em 0.2; o novo contrato de hipótese usa 0.3.
+A especificação do produto está em 0.4. Os oito contratos de evidência anteriores permanecem em 0.2; o contrato de hipótese usa 0.3.
 
-Publicar o plano registra requisitos. Execuções, conexões MCP e validação de competências pertencem às entregas futuras.
+Os testes da aplicação verificam mecanismos e efeitos locais. Conexões MCP, cloud real e validação humana de competências pertencem às etapas seguintes.
