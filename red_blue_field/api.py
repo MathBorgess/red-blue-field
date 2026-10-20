@@ -9,6 +9,7 @@ import time
 import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response, StreamingResponse
@@ -58,10 +59,17 @@ class Proposal(StrictModel):
 class ResponseBody(StrictModel):
     response: str = Field(max_length=80)
     reason: str = Field(min_length=3, max_length=2000)
+    actor: Literal['human', 'external_agent'] = 'human'
+    external_session_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
+    evidence_sequences: list[int] = Field(default_factory=list, max_length=30)
 
 
 class ToolProfile(StrictModel):
     profile: str = Field(pattern=r'^(http_headers|nmap_local|sqlmap_fixture|filesystem|system|crypto|python|network|metasploit_version)$')
+
+
+class StepBody(StrictModel):
+    expected_hypothesis_id: str = Field(pattern=r'^h-[a-f0-9]{12}$')
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -213,8 +221,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return run.public()
 
     @app.post("/api/runs/{run_id}/step", dependencies=[Depends(control)])
-    async def step(run_id: str):
-        return await lab.step(get_run(run_id))
+    async def step(run_id: str, body: StepBody | None = None):
+        return await lab.step(get_run(run_id), expected_hypothesis_id=body.expected_hypothesis_id if body else None)
 
     @app.post("/api/runs/{run_id}/stop", dependencies=[Depends(control)])
     async def stop(run_id: str):
@@ -299,7 +307,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         async with run.lock:
             if run.status in TERMINAL:
                 raise HTTPException(409, "Closed episodes are immutable; create a new episode for retest")
-            result = await lab.respond(run, body.response, body.reason, reviewer=True)
+            if body.actor == 'external_agent':
+                if not body.external_session_id or not body.evidence_sequences:
+                    raise HTTPException(422, 'External defense needs session identity and observed evidence')
+                if any(n < 0 or n >= len(run.collector.events) or run.collector.events[n]['actor'] not in {'tool', 'target', 'policy', 'blue'} for n in body.evidence_sequences):
+                    raise HTTPException(422, 'Defense evidence must refer to authenticated episode observations')
+            result = await lab.respond(run, body.response, body.reason, reviewer=body.actor == 'human',
+                external_session_id=body.external_session_id if body.actor == 'external_agent' else None,
+                evidence_sequences=body.evidence_sequences)
             run.flush()
             return result
 

@@ -264,10 +264,12 @@ class Lab:
         run.add_hypothesis(action, parent=parent, claim=str(value.get("claim", action.reason)),
                            falsification=str(value.get("falsification", "The observed result contradicts the claim.")))
 
-    async def step(self, run: Run) -> dict:
+    async def step(self, run: Run, expected_hypothesis_id: str | None = None) -> dict:
         async with run.lock:
             if run.status in TERMINAL:
                 return run.public()
+            if expected_hypothesis_id and (not run.stack or run.stack[-1]['node']['hypothesis_id'] != expected_hypothesis_id):
+                raise Denied('Pending hypothesis changed; review the new action before execution', 'tool_gateway')
             try:
                 run.limits.check()
                 run.status = "running"
@@ -350,13 +352,17 @@ class Lab:
                 await self.finish(run, "controller_stop")
         return run.public()
 
-    async def respond(self, run: Run, response: str, reason: str, reviewer: bool = False):
+    async def respond(self, run: Run, response: str, reason: str, reviewer: bool = False,
+                      external_session_id: str | None = None, evidence_sequences: list[int] | None = None):
         allowed = {"observe", "quarantine_document", "suspend_tool", "revoke_session", "restore"}
         if response not in allowed:
             run.behavior_deviation = True
             run.emit("policy", "policy.evaluated", {"actor": "blue", "denied": response, "layer": "tool_gateway"})
             raise Denied("Blue action outside response capabilities", "tool_gateway")
         if response == "observe":
+            if external_session_id:
+                run.emit('blue', 'blue.response', {'response': response, 'reason': reason, 'human_operator': False,
+                    'external_session_id': external_session_id, 'evidence_sequences': evidence_sequences or []})
             return {"observed": True}
         before = run.fixture.snapshot()
         if response == "restore":
@@ -369,7 +375,8 @@ class Lab:
                              "revoke_session": "session_revoked"}[response], True)
         run.containment_ms = (time.monotonic() - run.limits.started) * 1000
         ref = run.collector.json(f"blue-response-{len(run.collector.events)}.json", {"before": before, "after": run.fixture.snapshot()}, "state_after")
-        run.emit("blue", "blue.response", {"response": response, "reason": reason, "human_operator": reviewer}, [ref])
+        run.emit("blue", "blue.response", {"response": response, "reason": reason, "human_operator": reviewer,
+                 'external_session_id': external_session_id, 'evidence_sequences': evidence_sequences or []}, [ref])
         return {"response": response, "verified": True, "evidence_ref": ref}
 
     def evaluate(self, run: Run, snapshot: dict) -> tuple[bool, list[dict]]:

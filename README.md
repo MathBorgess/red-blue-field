@@ -24,6 +24,10 @@ Crie S01 no perfil A, execute e baixe as evidências. Repita no perfil B para co
 
 O [guia de execução](docs/running-the-lab.md) explica modos, ferramentas, revisão humana, campanhas e relatórios.
 
+Os [chats Red e Blue](docs/terminal-agents.md) usam Deep Agents e sua proxy local do Codex em dois terminais.
+
+Eles incluem prompts editáveis, planos visíveis e logs separados de mensagens, ferramentas, latência e tokens informados.
+
 ## O que está pronto
 
 | Componente | Entrega |

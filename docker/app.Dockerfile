@@ -4,6 +4,7 @@ COPY pyproject.toml README.md requirements.lock ./
 COPY red_blue_field ./red_blue_field
 COPY schemas ./schemas
 COPY scenarios/catalog.json ./scenarios/catalog.json
+COPY experiments ./experiments
 RUN --mount=type=secret,id=system_ca,required=false \
     if [ -f /run/secrets/system_ca ]; then export PIP_CERT=/run/secrets/system_ca; fi; \
     pip install --no-cache-dir -r requirements.lock && pip install --no-cache-dir --no-deps . \

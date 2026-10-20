@@ -77,6 +77,14 @@ Os requisitos futuros de cloud real e conexão MCP permanecem documentados. Sua 
 5. Acrescentar assinatura externa de evidências e identidades distintas para avaliadores humanos.
 6. Criar infraestrutura e adaptadores para cloud real, com conta própria, custo limitado e descarte verificado.
 
+## Chats externos com Codex
+
+Os [scripts Red e Blue](terminal-agents.md) usam Deep Agents e o protocolo Responses da proxy local existente.
+
+Cada chat registra prompt, plano, ferramentas, respostas e métricas em uma sessão própria. O identificador do episódio liga os dois fluxos.
+
+Esses chats oferecem funções por papel sobre a interface local. Os servidores MCP permanecem na próxima etapa.
+
 ## Pendências de validação e estudo
 
 1. Executar modelos identificados, dentro dos acessos disponíveis. Os testes atuais do intermediário usam um provedor simulado.

@@ -1,0 +1,49 @@
+{
+  "version": "terminal-chats-0.1",
+  "executed_on": "2026-10-20",
+  "command": "RBF_TEST_DOCKER=1 RBF_TEST_BROWSER=1 pytest -q --tb=short",
+  "tests": 178,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "terminal_tests": 13,
+  "junit_sha256": "0a7966f77e593dca0ce12e60e9b9463576406663408e316fc2c7f52d1b46e17e",
+  "dependencies": {
+    "deepagents": "0.7.28",
+    "langchain-openai": "1.7.2",
+    "langchain-core": "1.6.12",
+    "langgraph": "1.2.16"
+  },
+  "sources": {
+    "red_blue_field/terminal.py": "811df4e84abc112692dfb5273dc08677181b5ea1ccae1a42386e124c73acd719",
+    "red_blue_field/terminal_logs.py": "a01ca6b9694ebda2776fade255ec8dfa52a9b3d970fc6b58119f235a03359f81",
+    "red_blue_field/terminal_tools.py": "4bc5db96f32eb6ab3244faa15b05d2105e7eab4ced30968bd39c1997c864ddfd",
+    "red_blue_field/prompts/red_terminal.md": "375567cce7ef1efb5dfe2a956fec6c672f13fb2cdf5fd5adcaa21b8dcbaeca87",
+    "red_blue_field/prompts/blue_terminal.md": "d141a009800b83f76520b05aaf510791359771344992d4ba1b57a1d3a09d3d60",
+    "scripts/red_teamer.py": "bcfbe34a7b5a47bb7cd2df9a409315c1885b58c7f5f38e1dbb5280fcd7616d5a",
+    "scripts/blue_teamer.py": "3bf0d43e26b092dd524a6c81f6d5e80538c9d45ad0c6c0132f3590e001c1e6c4",
+    "experiments/blue_terminal.json": "87498eb975260537cf0ff27e9052304604fe09ced498b3aa884c656fd7cdd6e8",
+    "experiments/red_terminal.json": "60bb3300ebb95a3541646afcbdc44f5e3c2a2c5c0800a7929600359a7986d5da",
+    "tests/test_terminal.py": "9760b0631d4f856c8d1cc417dc5f9517cb2f5060226ef7f8bbebe8f5a7fd3a19",
+    "red_blue_field/api.py": "1c610cc3bd67234068be33ae715328dbc5a7269a8ad7195be31ff85d2de64524",
+    "red_blue_field/engine.py": "51222d5403c60525fd88f952ead83091dacaea61e2be01c8a9aa3c7feeab1a1f"
+  },
+  "validated": [
+    "two Python terminal subprocesses",
+    "native Responses tool call round trip",
+    "visible planning updates",
+    "separate red and blue logs and metrics",
+    "shared episode and blue session correlation",
+    "bound hypothesis execution",
+    "operator action gate",
+    "blue evidence pagination",
+    "credential redaction and pre-dispatch block",
+    "private reasoning omitted from logs",
+    "request budget stop"
+  ],
+  "provider": "simulated native Responses endpoint",
+  "live_codex_execution": "not_executed; no local authenticated proxy in this environment",
+  "docker_app_build": "passed",
+  "wheel_resources": "prompts and both experiment definitions included",
+  "proxy_reference_commit": "4ffb59ad151d8f544a4920daf00be11c3faede20"
+}
