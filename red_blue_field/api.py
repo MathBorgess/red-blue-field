@@ -20,9 +20,10 @@ from .config import Settings
 from .engine import Lab, TERMINAL
 from .evidence import digest, now, verify_export
 from .fielddesk import Denied
-from .models import Action, Assessment, CampaignRequest, FindingDecision, ReviewDecision, RunRequest, StrictModel
+from .models import Action, Assessment, CampaignRequest, FindingDecision, ReviewDecision, RunRequest, SignRequest, StrictModel
 from .security import Halt, NeedsReview
-from .tools import CASE_TOOLS, INTERNAL_CALL
+from .signing import sign_export, verify_signature
+from .tools import ALLOWED_TOOL_PROFILES, CASE_TOOLS, INTERNAL_CALL
 
 
 class TextBody(StrictModel):
@@ -62,10 +63,11 @@ class ResponseBody(StrictModel):
     actor: Literal['human', 'external_agent'] = 'human'
     external_session_id: str | None = Field(default=None, pattern=r'^[a-f0-9]{32}$')
     evidence_sequences: list[int] = Field(default_factory=list, max_length=30)
+    recreate_worker: bool = False
 
 
 class ToolProfile(StrictModel):
-    profile: str = Field(pattern=r'^(http_headers|nmap_local|sqlmap_fixture|filesystem|system|crypto|python|network|metasploit_version)$')
+    profile: str = Field(pattern=r'^(' + '|'.join(sorted(ALLOWED_TOOL_PROFILES)) + r')$')
 
 
 class StepBody(StrictModel):
@@ -191,8 +193,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def readiness():
         return {"local_services": True, "scripted_agents": True, "model_broker": lab.broker.ready(),
                 "workers_configured": bool(lab.settings.worker_a_url and lab.settings.worker_b_url),
-                "cloud_emulator": True, "cloud_live": "not_enabled_in_local_experiment",
-                "mcp_red": "excluded", "mcp_blue": "excluded", "recovered_interruptions": lab.interrupted,
+                "cloud_emulator": True, "cloud_live": "ready" if lab.cloud_adapter.ready() else "not_enabled_in_local_experiment",
+                "mcp_red": "ready", "mcp_blue": "ready", "recovered_interruptions": lab.interrupted,
                 "environment": "local lab; cloud provider and model execution are separately configured"}
 
     @app.get("/api/scenarios", dependencies=[Depends(control)])
@@ -241,7 +243,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if run.status in TERMINAL:
             raise HTTPException(409, 'Episode capabilities are closed; create a new episode')
         # Deliberately a controller-only capability minting/inspection operation.
-        return {"participant_token": run.tokens["red"], "target_base_path": f"/lab/{run_id}", "expires_at": run.scope["valid_until"]}
+        return {
+            "participant_token": run.tokens["red"],
+            "blue_token": run.tokens["blue"],
+            "reviewer_token": run.tokens["reviewer"],
+            "target_base_path": f"/lab/{run_id}",
+            "expires_at": run.scope["valid_until"],
+        }
 
     @app.get("/api/runs/{run_id}/state", dependencies=[Depends(control)])
     async def state(run_id: str):
@@ -291,12 +299,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return lab.store.list("reviews", run_id)
 
     @app.post("/api/runs/{run_id}/reviews/{review_id}", dependencies=[Depends(control)])
-    async def decide(run_id: str, review_id: str, decision: ReviewDecision):
+    async def decide(run_id: str, review_id: str, decision: ReviewDecision, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
+        reviewer_id = decision.reviewer_id or (x_reviewer_id if x_reviewer_id.startswith("human:") else None)
         async with run.lock:
             if run.status in TERMINAL:
                 raise HTTPException(409, "Episode closed")
-            value = run.reviews.decide(review_id, decision.operation_hash, decision.decision, decision.reason)
+            value = run.reviews.decide(review_id, decision.operation_hash, decision.decision, decision.reason, reviewer_id=reviewer_id)
             run.status = "prepared"
             run.flush()
         return value
@@ -314,7 +323,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     raise HTTPException(422, 'Defense evidence must refer to authenticated episode observations')
             result = await lab.respond(run, body.response, body.reason, reviewer=body.actor == 'human',
                 external_session_id=body.external_session_id if body.actor == 'external_agent' else None,
-                evidence_sequences=body.evidence_sequences)
+                evidence_sequences=body.evidence_sequences, recreate_worker=body.recreate_worker)
             run.flush()
             return result
 
@@ -325,9 +334,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/runs/{run_id}/artifacts/{name:path}", dependencies=[Depends(control)])
     async def artifact(run_id: str, name: str):
         run = get_run(run_id)
-        if name not in run.collector.artifacts and name != "manifest.json":
+        if name not in run.collector.artifacts and name not in {"manifest.json", "signature.json"}:
             raise HTTPException(404, "Artifact is not in the collector manifest")
-        return FileResponse(run.collector.path(name), filename=Path(name).name)
+        path = run.collector.path(name)
+        if not path.is_file():
+            raise HTTPException(404, "Artifact not found")
+        return FileResponse(path, filename=Path(name).name)
+
+    @app.post("/api/runs/{run_id}/sign", dependencies=[Depends(control)])
+    async def sign(run_id: str, body: SignRequest):
+        run = get_run(run_id)
+        async with run.lock:
+            if run.status not in TERMINAL:
+                raise HTTPException(409, "Finish the episode before signing evidence")
+            return sign_export(run.collector.root, body.private_key_hex, body.signer_id)
 
     @app.get("/api/runs/{run_id}/export", dependencies=[Depends(control)])
     async def export(run_id: str):
@@ -336,14 +356,20 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             if run.status not in TERMINAL:
                 raise HTTPException(409, "Finish the episode before export")
             verify_export(run.collector.root)
+            sig_path = run.collector.root / "signature.json"
+            if sig_path.is_file():
+                verify_signature(run.collector.root)
             data = io.BytesIO()
             with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED) as archive:
-                for name in ["manifest.json", *run.collector.artifacts]:
+                names = ["manifest.json", *run.collector.artifacts]
+                if sig_path.is_file():
+                    names.append("signature.json")
+                for name in names:
                     archive.writestr(name, run.collector.path(name).read_bytes())
             return Response(data.getvalue(), media_type="application/zip", headers={"Content-Disposition": f'attachment; filename="{run_id}.zip"'})
 
     @app.post("/api/runs/{run_id}/findings", dependencies=[Depends(control)])
-    async def finding(run_id: str, body: FindingDecision):
+    async def finding(run_id: str, body: FindingDecision, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
         if run.status not in TERMINAL:
             raise HTTPException(409, "Finish the episode before independent review")
@@ -352,10 +378,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(422, "Existing runtime artifact references are required")
         if body.status == "confirmed" and (not run.episode or run.episode["attacker_success"] is not True):
             raise HTTPException(422, "Confirmation requires a verified target effect")
+        verifier_id = body.verifier_id or (x_reviewer_id if x_reviewer_id.startswith("human:") else "human:operator")
         identifier = "finding-" + secrets.token_hex(8)
         record = dict(schema_version="0.2.0", finding_id=identifier, run_id=run.id, source_revision=run.source_revision,
             status=body.status, title=run.scenario["title"], finder_id="red:" + run.request.mode,
-            verifier_id="human:operator", independent_verification_ref="verification-" + identifier + ".json",
+            verifier_id=verifier_id, independent_verification_ref="verification-" + identifier + ".json",
             trust_boundary=run.scenario["surface"], trace_refs=["events.jsonl"], runtime_evidence_refs=refs,
             severity=body.severity if body.status == "confirmed" else None,
             decisive_unknown=body.decisive_unknown if body.status == "needs_validation" else None,
@@ -365,13 +392,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             lab.contracts.validate("finding", record)
         except Exception as error:
             raise HTTPException(422, "Finding does not meet the evidence contract: " + str(error)[:200])
-        run.collector.json(record["independent_verification_ref"], {"reviewer": "human:operator", "reason": body.reason, "evidence_refs": refs})
+        run.collector.json(record["independent_verification_ref"], {"reviewer": verifier_id, "reason": body.reason, "evidence_refs": refs})
         if record["remediation_ref"]:
             run.collector.json(record["remediation_ref"], {"proposed_control": run.scenario["blue_control"], "retest_status": "pending"})
         with lab.store.connect() as db:
             db.execute("INSERT INTO findings VALUES(?,?,?)", (identifier, run_id, json.dumps(record)))
         run.collector.jsonl("findings.jsonl", lab.store.list("findings", run.id), "findings")
-        run.emit("verifier", "finding.verified", {"finding_id": identifier, "status": body.status, "reviewer": "human:operator"}, refs)
+        run.emit("verifier", "finding.verified", {"finding_id": identifier, "status": body.status, "reviewer": verifier_id}, refs)
         run.flush()
         return record
 
@@ -380,13 +407,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return lab.store.list("assessments", run_id)
 
     @app.post("/api/runs/{run_id}/assessments", dependencies=[Depends(control)])
-    async def assess(run_id: str, body: Assessment):
+    async def assess(run_id: str, body: Assessment, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
         if run.status not in TERMINAL:
             raise HTTPException(409, "Finish the episode before assessment")
         if body.level != "not_assessed" and (not body.evidence_refs or any(r not in run.collector.artifacts for r in body.evidence_refs)):
             raise HTTPException(422, "Assessment requires existing evidence")
-        record = {**body.model_dump(), "reviewer": "human:operator", "timestamp": now(), "review_kind": "operator_reported"}
+        reviewer_id = body.reviewer_id or (x_reviewer_id if x_reviewer_id.startswith("human:") else "human:operator")
+        review_kind = "external_human_verified" if reviewer_id != "human:operator" else "operator_reported"
+        record = {**body.model_dump(exclude={"reviewer_id"}), "reviewer": reviewer_id, "timestamp": now(), "review_kind": review_kind}
         with lab.store.connect() as db:
             db.execute("INSERT INTO assessments(run_id,body) VALUES(?,?)", (run_id, json.dumps(record)))
         run.collector.json("assessments.json", lab.store.list("assessments", run_id))
@@ -501,7 +530,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise Denied("Cloud operation outside scenario", "tool_gateway")
         if not INTERNAL_CALL.get() and body.operation not in {'inspect', 'read_private', 'connect_private', 'healthcheck'}:
             run.reviews.gate({'name': 'cloud', 'operation': body.operation})
-        return await observed(run, 'cloud', run.fixture.cloud(body.operation))
+        result = lab.cloud_adapter.execute(run, body.operation) if run.environment == "cloud_live" else run.fixture.cloud(body.operation)
+        return await observed(run, 'cloud', result)
 
     @app.post('/lab/{run_id}/actions')
     async def participant_action(body: Action, run=Depends(participant)):
@@ -536,6 +566,32 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             run.emit('tool', 'runner.command', {'profile': body.profile, 'http_status': result.status_code, 'target': 'worker_loopback'}, [ref])
             run.flush()
             return value
+
+    @app.post("/mcp/red")
+    async def mcp_red(request: Request, authorization: str = Header(default=""), x_control_token: str = Header(default="")):
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse({"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "Parse error"}}, 400)
+        token = authorization or x_control_token
+        resp = await lab.mcp_red.handle_jsonrpc(body, token=token)
+        if resp is None:
+            return Response(status_code=202)
+        status_code = 401 if resp.get("error", {}).get("code") == -32001 else 200
+        return JSONResponse(resp, status_code=status_code)
+
+    @app.post("/mcp/blue")
+    async def mcp_blue(request: Request, authorization: str = Header(default=""), x_control_token: str = Header(default="")):
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse({"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "Parse error"}}, 400)
+        token = authorization or x_control_token
+        resp = await lab.mcp_blue.handle_jsonrpc(body, token=token)
+        if resp is None:
+            return Response(status_code=202)
+        status_code = 401 if resp.get("error", {}).get("code") == -32001 else 200
+        return JSONResponse(resp, status_code=status_code)
 
     lab.target_app = app
     static = Path(__file__).parent / "static"

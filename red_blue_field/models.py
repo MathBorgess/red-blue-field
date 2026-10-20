@@ -41,6 +41,7 @@ class ReviewDecision(StrictModel):
     decision: Literal["approve", "deny"]
     reason: str = Field(min_length=3, max_length=2000)
     operation_hash: str = Field(pattern=r"^[a-f0-9]{64}$")
+    reviewer_id: str | None = Field(default=None, pattern=r"^human:[a-zA-Z0-9._-]{2,64}$")
 
 
 class FindingDecision(StrictModel):
@@ -50,6 +51,7 @@ class FindingDecision(StrictModel):
     severity: Literal["low", "medium", "high", "critical"] | None = None
     decisive_unknown: str | None = None
     validation_plan: str | None = None
+    verifier_id: str | None = Field(default=None, pattern=r"^human:[a-zA-Z0-9._-]{2,64}$")
 
 
 class Assessment(StrictModel):
@@ -59,6 +61,12 @@ class Assessment(StrictModel):
     explanation: str = Field(min_length=8, max_length=4000)
     assistance: str = Field(default="", max_length=2000)
     gaps: str = Field(default="", max_length=2000)
+    reviewer_id: str | None = Field(default=None, pattern=r"^human:[a-zA-Z0-9._-]{2,64}$")
+
+
+class SignRequest(StrictModel):
+    signer_id: str = Field(pattern=r"^human:[a-zA-Z0-9._-]{2,64}$")
+    private_key_hex: str = Field(pattern=r"^[a-fA-F0-9]{64}$")
 
 
 class CampaignRequest(StrictModel):

@@ -40,6 +40,7 @@ class Settings:
     worker_a_token: str = field(default_factory=lambda: os.getenv("RBF_WORKER_A_TOKEN", ""), repr=False)
     worker_b_token: str = field(default_factory=lambda: os.getenv("RBF_WORKER_B_TOKEN", ""), repr=False)
     aws_config: Path | None = None
+    auto_recreate_workers: bool = field(default_factory=lambda: os.getenv("RBF_AUTO_RECREATE_WORKERS", "0") == "1")
     code_revision: str = field(default_factory=revision)
 
     def prepare(self) -> None:

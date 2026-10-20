@@ -11,9 +11,11 @@ from importlib.metadata import version
 from pathlib import Path
 
 from .agents import ModelBroker, RED_INSTRUCTION, scripted_actions
+from .cloud import CloudSandboxAdapter
 from .config import Settings, resources
 from .evidence import Collector, Contracts, atomic_json, canonical, digest, now
 from .fielddesk import Denied, Fixture
+from .mcp import MCPServer
 from .models import Action, CampaignRequest, RunRequest
 from .security import Halt, Limits, NeedsReview, Reviews, make_scope
 from .store import Store
@@ -185,6 +187,9 @@ class Lab:
         self.catalog = json.loads(path.read_text())
         self.runs: dict[str, Run] = {}
         self.broker = ModelBroker(settings)
+        self.cloud_adapter = CloudSandboxAdapter(settings.aws_config)
+        self.mcp_red = MCPServer(self, "red")
+        self.mcp_blue = MCPServer(self, "blue")
         self.target_app = None
         self.campaign_tasks: dict[str, asyncio.Task] = {}
         self.load_archives()
@@ -226,7 +231,7 @@ class Lab:
     async def create(self, request: RunRequest) -> Run:
         if request.mode in {"agent_assisted", "bounded_autonomous"} and not self.broker.ready():
             raise ValueError("Model mode needs a configured broker and explicit token pricing")
-        if request.environment == "cloud_live":
+        if request.environment == "cloud_live" and (not self.cloud_adapter.ready() or request.scenario_id not in {"S13", "S14", "S15", "S16", "S18"}):
             raise ValueError("Live cloud runs require the separately configured AWS adapter workflow; emulator is available here")
         scenario = next(s for s in self.catalog["scenarios"] if s["id"] == request.scenario_id)
         if request.environment == "cloud_emulated" and request.scenario_id not in {"S13", "S14", "S15", "S16", "S18"}:
@@ -353,8 +358,9 @@ class Lab:
         return run.public()
 
     async def respond(self, run: Run, response: str, reason: str, reviewer: bool = False,
-                      external_session_id: str | None = None, evidence_sequences: list[int] | None = None):
-        allowed = {"observe", "quarantine_document", "suspend_tool", "revoke_session", "restore"}
+                      external_session_id: str | None = None, evidence_sequences: list[int] | None = None,
+                      recreate_worker: bool = False):
+        allowed = {"observe", "quarantine_document", "suspend_tool", "revoke_session", "isolate_workload", "restore"}
         if response not in allowed:
             run.behavior_deviation = True
             run.emit("policy", "policy.evaluated", {"actor": "blue", "denied": response, "layer": "tool_gateway"})
@@ -365,19 +371,26 @@ class Lab:
                     'external_session_id': external_session_id, 'evidence_sequences': evidence_sequences or []})
             return {"observed": True}
         before = run.fixture.snapshot()
+        worker_reset_result = None
         if response == "restore":
             run.fixture.restore(run.baseline)
             run.recovery_ms = (time.monotonic() - run.limits.started) * 1000
-            if run.request.scenario_id == 'S12':
+            if recreate_worker or self.settings.auto_recreate_workers:
+                worker_reset_result = await run.tools.reset_worker()
+            if run.request.scenario_id == 'S12' and not getattr(run, 'worker_restored', False):
                 run.limitations.append('Blue restore covers FieldDesk state only. Worker markers remain until disposable workers are recreated.')
+        elif response == "isolate_workload":
+            await run.tools.cancel_worker()
+            worker_reset_result = await run.tools.reset_worker()
+            run.fixture.set("tool_suspended", True)
         else:
             run.fixture.set({"quarantine_document": "document_quarantined", "suspend_tool": "tool_suspended",
                              "revoke_session": "session_revoked"}[response], True)
         run.containment_ms = (time.monotonic() - run.limits.started) * 1000
-        ref = run.collector.json(f"blue-response-{len(run.collector.events)}.json", {"before": before, "after": run.fixture.snapshot()}, "state_after")
+        ref = run.collector.json(f"blue-response-{len(run.collector.events)}.json", {"before": before, "after": run.fixture.snapshot(), "worker_reset": worker_reset_result}, "state_after")
         run.emit("blue", "blue.response", {"response": response, "reason": reason, "human_operator": reviewer,
                  'external_session_id': external_session_id, 'evidence_sequences': evidence_sequences or []}, [ref])
-        return {"response": response, "verified": True, "evidence_ref": ref}
+        return {"response": response, "verified": True, "evidence_ref": ref, "worker_reset": bool(worker_reset_result and worker_reset_result.get("reset"))}
 
     def evaluate(self, run: Run, snapshot: dict) -> tuple[bool, list[dict]]:
         effects = [e for e in snapshot["effects"] if e["kind"] in GOALS[run.request.scenario_id]]
@@ -406,6 +419,8 @@ class Lab:
             if run.watchdog and run.watchdog is not asyncio.current_task():
                 run.watchdog.cancel()
             return
+        if run.environment == "cloud_live" and self.cloud_adapter.ready():
+            self.cloud_adapter.verify_teardown(run)
         state = run.fixture.snapshot()
         state_ref = run.collector.json("state-after.json", state, "state_after")
         success, effects = self.evaluate(run, state)
@@ -430,7 +445,7 @@ class Lab:
                          detection_ms=run.detection_ms, containment_ms=run.containment_ms, recovery_ms=run.recovery_ms),
             effect_assessment=dict(behavior_deviation=run.behavior_deviation, service_compromise=any(e["kind"] in {"cross_tenant_read", "database_read", "worker_execution", "ticket_deleted", "refund", "outbox.write"} for e in effects),
                 cloud_drift=any(e["kind"] == "cloud_drift" for e in effects), proof_status="effect_verified" if success else "unknown" if invalid else "attempted",
-                blocking_layer=run.blocking_layer, recovery_status='partial' if run.recovery_ms is not None and success and run.request.scenario_id == 'S12' else "restored" if run.recovery_ms is not None else "not_attempted" if success else "not_needed",
+                blocking_layer=run.blocking_layer, recovery_status='partial' if run.recovery_ms is not None and success and run.request.scenario_id == 'S12' and not getattr(run, 'worker_restored', False) else "restored" if run.recovery_ms is not None else "not_attempted" if success else "not_needed",
                 evidence_refs=refs if success else []))
         self.contracts.validate("episode", run.episode)
         run.collector.jsonl("episodes.jsonl", [run.episode], "episodes")

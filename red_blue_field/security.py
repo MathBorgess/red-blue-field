@@ -64,6 +64,11 @@ class Limits:
 
 def make_scope(run_id: str, request, scenario: dict, environment: str) -> dict:
     deadline = datetime.now(timezone.utc) + timedelta(seconds=request.budget.wall_time_seconds)
+    policy_review = (
+        dict(status="reviewed", reference="https://aws.amazon.com/security/penetration-testing/", decision_ref="control-policy.json")
+        if environment == "cloud_live"
+        else dict(status="not_applicable", reference=None, decision_ref=None)
+    )
     return dict(
         schema_version="0.2.0", scope_id="scope-" + run_id, scope_version="0.4.0",
         status="active", issued_by="lab-controller", valid_from=now(), valid_until=deadline.isoformat().replace("+00:00", "Z"),
@@ -72,7 +77,7 @@ def make_scope(run_id: str, request, scenario: dict, environment: str) -> dict:
                                allowed_actions=scenario["allowed_actions"])],
         allowed_destinations=["episode:" + run_id], forbidden_resources=["host", "other_episodes", "external_resources"],
         budget_ref="manifest.json#/budgets", stop_control_ref="control-policy.json",
-        recovery_plan_ref="recovery-plan.json", provider_policy_review=dict(status="not_applicable", reference=None, decision_ref=None),
+        recovery_plan_ref="recovery-plan.json", provider_policy_review=policy_review,
         allowed_tracks=[scenario["track"]], allowed_attacker_modes=[request.mode],
         control_assumptions_ref="control-policy.json", effect_limit="Synthetic data and reversible episode-local effects only",
         action_limits=dict(max_tool_calls=request.budget.max_steps, max_requests_per_second=20, max_concurrent_actions=1),
@@ -103,7 +108,7 @@ class Reviews:
         self.run.emit("reviewer", "approval.requested", review)
         return review
 
-    def decide(self, review_id: str, operation_hash: str, decision: str, reason: str) -> dict:
+    def decide(self, review_id: str, operation_hash: str, decision: str, reason: str, reviewer_id: str | None = None) -> dict:
         with self.store.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT body FROM reviews WHERE id=? AND run_id=?", (review_id, self.run.id)).fetchone()
@@ -112,8 +117,9 @@ class Reviews:
             review = json.loads(row[0])
             if review["status"] != "pending" or review["expires_at"] <= time.time() or not hmac.compare_digest(operation_hash, review["operation_hash"]):
                 raise Denied("Review expired, already decided or mismatched")
+            reviewer_name = (reviewer_id or "human:operator") if self.run.request.reviewer == "human_reviewer" else "scripted-reviewer"
             review.update(status="approved" if decision == "approve" else "denied", reason=reason,
-                          reviewer="human:operator" if self.run.request.reviewer == "human_reviewer" else "scripted-reviewer", decided_at=now())
+                          reviewer=reviewer_name, decided_at=now())
             db.execute("UPDATE reviews SET status=?,body=? WHERE id=?", (review["status"], json.dumps(review), review_id))
         self.run.emit("reviewer", "approval.decided", review)
         return review
