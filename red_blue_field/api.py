@@ -191,7 +191,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/readiness", dependencies=[Depends(control)])
     async def readiness():
-        return {"local_services": True, "scripted_agents": True, "model_broker": lab.broker.ready(),
+        return {"local_services": True, "scripted_agents": True, "model_broker": False,
                 "workers_configured": bool(lab.settings.worker_a_url and lab.settings.worker_b_url),
                 "cloud_emulator": True, "cloud_live": "ready" if lab.cloud_adapter.ready() else "not_enabled_in_local_experiment",
                 "mcp_red": "ready", "mcp_blue": "ready", "recovered_interruptions": lab.interrupted,
@@ -329,7 +329,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/api/runs/{run_id}/artifacts", dependencies=[Depends(control)])
     async def artifacts(run_id: str):
-        return get_run(run_id).manifest().get("artifacts", []) or json.loads((get_run(run_id).collector.root / "manifest.json").read_text())["artifacts"]
+        return json.loads((get_run(run_id).collector.root / "manifest.json").read_text())["artifacts"]
 
     @app.get("/api/runs/{run_id}/artifacts/{name:path}", dependencies=[Depends(control)])
     async def artifact(run_id: str, name: str):
@@ -344,6 +344,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/sign", dependencies=[Depends(control)])
     async def sign(run_id: str, body: SignRequest):
         run = get_run(run_id)
+        if run.record_kind == "model_run":
+            raise HTTPException(409, "Historical model runs are read-only")
         async with run.lock:
             if run.status not in TERMINAL:
                 raise HTTPException(409, "Finish the episode before signing evidence")
@@ -371,6 +373,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/findings", dependencies=[Depends(control)])
     async def finding(run_id: str, body: FindingDecision, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
+        if run.record_kind == "model_run":
+            raise HTTPException(409, "Historical model runs are read-only")
         if run.status not in TERMINAL:
             raise HTTPException(409, "Finish the episode before independent review")
         refs = body.evidence_refs
@@ -409,6 +413,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/assessments", dependencies=[Depends(control)])
     async def assess(run_id: str, body: Assessment, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
+        if run.record_kind == "model_run":
+            raise HTTPException(409, "Historical model runs are read-only")
         if run.status not in TERMINAL:
             raise HTTPException(409, "Finish the episode before assessment")
         if body.level != "not_assessed" and (not body.evidence_refs or any(r not in run.collector.artifacts for r in body.evidence_refs)):

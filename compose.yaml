@@ -10,11 +10,6 @@ services:
       RBF_WORKER_B_URL: http://worker-b:8080
       RBF_WORKER_A_TOKEN: ${RBF_WORKER_A_TOKEN:?Run rbf init first}
       RBF_WORKER_B_TOKEN: ${RBF_WORKER_B_TOKEN:?Run rbf init first}
-      RBF_MODEL_URL: ${RBF_MODEL_URL:-}
-      RBF_MODEL_NAME: ${RBF_MODEL_NAME:-}
-      RBF_MODEL_API_KEY: ${RBF_MODEL_API_KEY:-}
-      RBF_MODEL_INPUT_USD_PER_MILLION: ${RBF_MODEL_INPUT_USD_PER_MILLION:-}
-      RBF_MODEL_OUTPUT_USD_PER_MILLION: ${RBF_MODEL_OUTPUT_USD_PER_MILLION:-}
     volumes: ["lab-data:/data"]
     read_only: true
     tmpfs: ["/tmp:size=64m,mode=1777"]

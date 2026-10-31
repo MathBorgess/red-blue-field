@@ -66,18 +66,10 @@ rbf doctor
 
 | Modo | Comportamento |
 | --- | --- |
-| `manual` | Você propõe hipóteses ou chama a interface do alvo. |
-| `scripted` | Um roteiro fixo executa o caso conhecido. Dispensa modelo. |
-| `agent_assisted` | O modelo propõe e executa um passo por acionamento. |
-| `bounded_autonomous` | O modelo escolhe passos até parar ou atingir um limite. |
+| `manual` | A pessoa propõe hipóteses e conduz ações no escopo do episódio. |
+| `scripted` | Um roteiro fixo executa o caso conhecido. |
 
-Os modos com modelo usam uma interface compatível com OpenAI. Configure endereço, modelo e preços explícitos nas variáveis de `.env.example`.
-
-Um modelo local pode usar preços zero. As credenciais ficam no intermediário; os agentes recebem ferramentas com escopo.
-
-O laboratório dispensa licença Daybreak. Ele também preserva os limites do serviço de modelo escolhido e do ambiente de execução.
-
-Essa configuração habilita chamadas comuns ao provedor, dentro das regras e dos acessos disponíveis nesse serviço.
+O Codex local pode apoiar a investigação e a interpretação das evidências. Os antigos chats próprios e a proxy foram retirados; sua documentação histórica não descreve o fluxo atual.
 
 ## Intervenção humana
 
