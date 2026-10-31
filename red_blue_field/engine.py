@@ -10,7 +10,7 @@ import uuid
 from importlib.metadata import version
 from pathlib import Path
 
-from .agents import ModelBroker, RED_INSTRUCTION, scripted_actions
+from .agents import scripted_actions
 from .cloud import CloudSandboxAdapter
 from .config import Settings, resources
 from .evidence import Collector, Contracts, atomic_json, canonical, digest, now
@@ -42,8 +42,7 @@ class Run:
         self.environment = request.environment or ("cloud_emulated" if request.scenario_id in {"S13", "S14", "S15", "S16", "S18"} else "local_live")
         if request.scenario_id == "S10":
             self.environment = "local_replay"
-        self.uses_model = request.mode in {"agent_assisted", "bounded_autonomous"}
-        self.record_kind = "model_run" if self.uses_model else ("fixture_replay" if self.environment == "local_replay" else "tool_run")
+        self.record_kind = "fixture_replay" if self.environment == "local_replay" else "tool_run"
         self.status, self.error = "prepared", None
         self.created_at, self.finished_at = now(), None
         self.lock = asyncio.Lock()
@@ -68,7 +67,7 @@ class Run:
         self.behavior_deviation = False
         self.blocking_layer = "none"
         self.detection_ms = self.containment_ms = self.recovery_ms = None
-        self.limitations = ["Known-fixture scripted drivers are not autonomous vulnerability discovery."] if not self.uses_model else []
+        self.limitations = ["Known-fixture scripted drivers are not autonomous vulnerability discovery."]
         if self.environment == "cloud_emulated":
             self.limitations.append("Cloud effects occurred in the local emulator, not AWS.")
         self.limitations.append("Shared-process FieldDesk is limited to synthetic SQL/business faults; code execution is isolated in the Docker worker.")
@@ -93,7 +92,7 @@ class Run:
                                            'dependencies': {name: version(name) for name in ['fastapi', 'uvicorn', 'httpx', 'jsonschema', 'referencing', 'pydantic']}})
         self.emit("runner", "run.started", {"scenario": request.scenario_id, "profile": request.profile, "mode": request.mode})
         self.emit("runner", "episode.started", {"context": self.context, "benign": request.benign})
-        if request.mode != "manual" and not self.uses_model:
+        if request.mode == "scripted":
             actions = scripted_actions(self)
             if actions:
                 self.add_hypothesis(actions[0], parent=None)
@@ -141,8 +140,9 @@ class Run:
         return node
 
     def manifest(self, status: str = "interrupted") -> dict:
-        config = [dict(role=role, provider="openai-compatible", model_id=self.manager.settings.model_name, revision=None,
-                       parameters={"temperature": 0, "max_output_tokens": 1200}) for role in (["red", "target", "blue"] if self.uses_model else [])]
+        if self.record_kind == "model_run":
+            return json.loads((self.collector.root / "manifest.json").read_text())
+        config = []
         return dict(schema_version="0.2.0", record_kind=self.record_kind, run_id=self.id, status=status,
                     created_at=self.created_at, code_commit=self.source_revision,
                     scenario_version=self.scenario["version"], policy_version="0.4.0/" + self.request.profile,
@@ -160,6 +160,8 @@ class Run:
                     tool_calls=self.limits.tool_calls, model_calls=self.limits.model_calls, limitations=self.limitations)
 
     def flush(self):
+        if self.record_kind == "model_run":
+            raise ValueError("Historical model runs are read-only")
         self.collector.jsonl("hypotheses.jsonl", self.hypotheses)
         self.collector.json("frontier.json", self.frontier)
         self.collector.seal(self.manifest("complete" if self.status == "complete" else "invalid" if self.status == "invalid" else "interrupted"))
@@ -186,7 +188,6 @@ class Lab:
             path = resources() / "catalog.json"
         self.catalog = json.loads(path.read_text())
         self.runs: dict[str, Run] = {}
-        self.broker = ModelBroker(settings)
         self.cloud_adapter = CloudSandboxAdapter(settings.aws_config)
         self.mcp_red = MCPServer(self, "red")
         self.mcp_blue = MCPServer(self, "blue")
@@ -205,7 +206,7 @@ class Lab:
                 manifest = json.loads(run.collector.path('manifest.json').read_text())
                 run.source_revision = manifest['code_commit']
                 run.context, run.environment = record['context'], record['context']['environment_kind']
-                run.record_kind, run.uses_model = record['record_kind'], record['record_kind'] == 'model_run'
+                run.record_kind = record['record_kind']
                 run.created_at, run.finished_at = record['created_at'], record.get('finished_at')
                 run.error, run.episode = record.get('error'), record.get('episode')
                 run.fixture = Fixture(self.settings.data_dir / 'targets' / (run.id + '.sqlite3'),
@@ -229,8 +230,8 @@ class Lab:
                 self.store.put('runs', record['id'], record)
 
     async def create(self, request: RunRequest) -> Run:
-        if request.mode in {"agent_assisted", "bounded_autonomous"} and not self.broker.ready():
-            raise ValueError("Model mode needs a configured broker and explicit token pricing")
+        if request.mode not in {"manual", "scripted"}:
+            raise ValueError("Historical model modes cannot start new episodes")
         if request.environment == "cloud_live" and (not self.cloud_adapter.ready() or request.scenario_id not in {"S13", "S14", "S15", "S16", "S18"}):
             raise ValueError("Live cloud runs require the separately configured AWS adapter workflow; emulator is available here")
         scenario = next(s for s in self.catalog["scenarios"] if s["id"] == request.scenario_id)
@@ -257,18 +258,6 @@ class Lab:
                 if run.status not in TERMINAL:
                     await self.finish(run, "budget_exhausted")
 
-    async def model_next(self, run: Run, parent: dict | None):
-        context = {"task": run.scenario["legitimate_task"], "red_goal": run.scenario["red_goal"],
-                   "resources": ["fielddesk", "ticket-alpha", "ticket-beta", "document-1"],
-                   "tools": {k: TOOL_DESCRIPTIONS[k] for k in sorted(CASE_TOOLS[run.request.scenario_id])},
-                   "history": run.history[-12:], "budget_remaining": max(0, run.request.budget.max_steps - run.limits.tool_calls)}
-        value = await self.broker.decide(run, "red", RED_INSTRUCTION, context)
-        if value.get("stop"):
-            return
-        action = Action.model_validate(value.get("action", {}))
-        run.add_hypothesis(action, parent=parent, claim=str(value.get("claim", action.reason)),
-                           falsification=str(value.get("falsification", "The observed result contradicts the claim.")))
-
     async def step(self, run: Run, expected_hypothesis_id: str | None = None) -> dict:
         async with run.lock:
             if run.status in TERMINAL:
@@ -278,8 +267,6 @@ class Lab:
             try:
                 run.limits.check()
                 run.status = "running"
-                if not run.stack and run.uses_model:
-                    await self.model_next(run, None)
                 if not run.stack:
                     await self.finish(run, "completed")
                     return run.public()
@@ -310,9 +297,7 @@ class Lab:
                 run.stack.pop()
                 run.pending = None
                 await run.blue.observe(run, action, observation)
-                if run.uses_model:
-                    await self.model_next(run, node)
-                elif run.remaining_script:
+                if run.remaining_script:
                     # The baseline driver is explicitly a fixed known-fixture recipe.
                     next_action = run.remaining_script.pop(0)
                     run.add_hypothesis(next_action, parent=node)
@@ -342,11 +327,13 @@ class Lab:
     async def drive(self, run: Run):
         while run.status not in TERMINAL:
             await self.step(run)
-            if run.status == "waiting_review" or run.request.mode in {"manual", "agent_assisted"}:
+            if run.status == "waiting_review" or run.request.mode == "manual":
                 break
             await asyncio.sleep(0)
 
     async def stop(self, run: Run):
+        if run.status in TERMINAL:
+            return run.public()
         run.limits.stopped = True
         await run.tools.cancel_worker()
         if run.task and not run.task.done():
@@ -476,8 +463,8 @@ class Lab:
         # Validate all scenario inputs before recording a scheduled campaign.
         for sid in request.scenarios:
             RunRequest(scenario_id=sid)
-        if request.mode != "scripted" and not self.broker.ready():
-            raise ValueError("Model broker is not ready")
+        if request.mode != "scripted":
+            raise ValueError("Historical model modes cannot start new campaigns")
         body = dict(id=uuid.uuid4().hex, status="scheduled", created_at=now(), request=request.model_dump(), scheduled=combinations, runs=[])
         self.store.put("campaigns", body["id"], body)
         async def execute():

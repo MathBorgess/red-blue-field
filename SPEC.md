@@ -1,5 +1,7 @@
 # red-blue-field — especificação de estudo e implementação
 
+> **Documento histórico de 20/10/2026.** Partes sobre chats, modelos e MCP descrevem planos anteriores. Para a organização e os limites atuais, consulte [README](README.md) e [estado da implementação](docs/implementation-status.md).
+
 Revisão **0.4 · 20/10/2026**. Estado: aplicação local executável, cenários e evidências. Os servidores de integração pertencem à próxima etapa.
 
 ## Problem Statement

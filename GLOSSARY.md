@@ -1,10 +1,14 @@
 # Vocabulário
 
+**Field**:
+Conjunto de alvos e cenários para investigação e exercícios autorizados.
+
 | Termo | Significado no laboratório |
 | --- | --- |
-| Aplicação alvo | FieldDesk: serviço fictício e seu assistente de produto. |
-| Red team | Agente que tenta atingir um objetivo adversarial limitado pelo cenário. |
-| Blue team | Agente defensor que investiga sinais e atua com permissões explícitas. |
+| Aplicação alvo | Aplicação incluída no escopo de uma investigação ou exercício. |
+| FieldDesk | Serviço fictício e seu assistente de produto. |
+| Red team | Papel que investiga e testa hipóteses adversariais dentro do escopo autorizado. |
+| Blue team | Papel que verifica achados, investiga sinais e atua na defesa e na resposta com permissões explícitas. |
 | Controlador | Software externo aos agentes que impõe escopo, orçamento, sequência e interrupção. |
 | Avaliador / oráculo | Verificador que usa efeitos e estado da aplicação para classificar resultados. |
 | Cenário | Contrato versionado de tarefa legítima, objetivo adversarial, capacidade permitida e evidência necessária. |
@@ -28,5 +32,5 @@
 | Agência / autonomia | Capacidades de agir concedidas / independência para decidir como e quando agir. |
 | Black / gray / white box | Acesso externo / informação parcial / código e arquitetura autorizados; condições de estudo diferentes. |
 | Desvio / comprometimento / drift | Comportamento fora da tarefa / efeito indevido confirmado no serviço / mudança de configuração observada. |
-| Verificador de achados | Papel distinto do descobridor que reconstrói a alegação e confere evidências; diferente de blue e aprovador. |
+| Verificador de achados | Papel que reconstrói uma alegação e confere suas evidências; pode ser exercido pelo Blue team. |
 | Ledger de cobertura | Registro de unidades e verificações por revisão; ausência de achados não comprova cobertura total. |

@@ -5,7 +5,6 @@ import secrets
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
-from urllib.parse import urlsplit
 
 
 def resources() -> Path:
@@ -30,11 +29,6 @@ def revision() -> str:
 class Settings:
     data_dir: Path = field(default_factory=lambda: Path(os.getenv("RBF_DATA_DIR", "artifacts/private")))
     control_token: str = ""
-    model_url: str = field(default_factory=lambda: os.getenv("RBF_MODEL_URL", ""))
-    model_name: str = field(default_factory=lambda: os.getenv("RBF_MODEL_NAME", ""))
-    model_key: str = field(default_factory=lambda: os.getenv("RBF_MODEL_API_KEY", ""), repr=False)
-    model_input_usd_per_million: float | None = None
-    model_output_usd_per_million: float | None = None
     worker_a_url: str = field(default_factory=lambda: os.getenv("RBF_WORKER_A_URL", ""))
     worker_b_url: str = field(default_factory=lambda: os.getenv("RBF_WORKER_B_URL", ""))
     worker_a_token: str = field(default_factory=lambda: os.getenv("RBF_WORKER_A_TOKEN", ""), repr=False)
@@ -59,16 +53,5 @@ class Settings:
                     handle.write(self.control_token)
         if len(self.control_token) < 24:
             raise ValueError("RBF_CONTROL_TOKEN must contain at least 24 characters")
-        if self.model_url:
-            endpoint = urlsplit(self.model_url)
-            if endpoint.scheme not in {'http', 'https'} or not endpoint.hostname or endpoint.username or endpoint.password or endpoint.query or endpoint.fragment:
-                raise ValueError('Model URL requires HTTP(S), a hostname and no embedded credentials or query')
-        for name in ["model_input_usd_per_million", "model_output_usd_per_million"]:
-            value = os.getenv("RBF_" + name.upper())
-            if value:
-                setattr(self, name, float(value))
-            price = getattr(self, name)
-            if price is not None and (not __import__('math').isfinite(price) or price < 0):
-                raise ValueError("Model prices must be finite and nonnegative")
         if os.getenv("RBF_AWS_CONFIG"):
             self.aws_config = Path(os.environ["RBF_AWS_CONFIG"]).resolve()

@@ -77,7 +77,7 @@ def main():
     elif args.command == 'doctor':
         settings = Settings()
         settings.prepare()
-        print(json.dumps({'data_directory': str(settings.data_dir), 'control_token_file': str(settings.data_dir / 'control-token'), 'worker_urls_configured': bool(settings.worker_a_url and settings.worker_b_url), 'model_configured': bool(settings.model_url and settings.model_name), 'mcp_red': 'ready', 'mcp_blue': 'ready'}, indent=2))
+        print(json.dumps({'data_directory': str(settings.data_dir), 'control_token_file': str(settings.data_dir / 'control-token'), 'worker_urls_configured': bool(settings.worker_a_url and settings.worker_b_url), 'model_configured': False, 'mcp_red': 'ready', 'mcp_blue': 'ready'}, indent=2))
     else:
         async def execute():
             app = create_app()
