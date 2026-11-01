@@ -31,6 +31,9 @@ Conjunto de alvos e cenários para investigação e exercícios autorizados.
 | JWT-SVID | Credencial JWT assinada que representa um SPIFFE ID para uma audiência e um prazo definidos. |
 | Federação de identidade de workload (WIF) | Uso de uma identidade de workload verificada para obter ou exercer uma credencial em outro serviço ou domínio de confiança. |
 | Concessão de tarefa | Autorização limitada que vincula pessoa, workload, ação, recurso e prazo a uma tarefa específica. |
+| OPA / Rego | Motor local de decisão de política e linguagem usada nesta bancada para avaliar atributos recebidos da API. OPA não autentica Alice nem o workload por si. |
+| PEP / PDP | Ponto de aplicação que interrompe a ação (API FieldDesk) / ponto que avalia a política (OPA). |
+| Confused deputy | Um serviço usa sua autoridade para atender a uma solicitação fora da autorização do principal que iniciou a tarefa. |
 | Estado da evidência | Observado, demonstrado, relatado por fornecedor, hipotético ou não executado. |
 | Pentest com agentes | Uso de agente para investigar e confirmar falhas em serviços; o alvo pode funcionar sem IA. |
 | Agentic red teaming | Avaliação adversarial de objetivos, decisões, ferramentas, memória e autonomia de um agente. |

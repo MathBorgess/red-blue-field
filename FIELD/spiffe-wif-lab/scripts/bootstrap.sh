@@ -147,8 +147,12 @@ docker compose build mock-api
 docker compose build agent
 docker compose build rogue
 "$lab_dir/scripts/register.sh" protected
-docker compose up -d oidc mock-api
+docker compose up -d oidc opa mock-api
 
+if ! wait_exec mock-api python -c 'import httpx; h=httpx.get("http://opa:8181/health", trust_env=False, timeout=3); h.raise_for_status(); d=httpx.post("http://opa:8181/v1/data/fielddesk/authz/allow", json={"input": {}}, trust_env=False, timeout=3); d.raise_for_status(); assert d.json().get("result") is False'; then
+    docker compose logs --tail=40 opa >&2
+    exit 1
+fi
 wait_exec mock-api python -c 'import httpx; r=httpx.get("https://oidc.local:8443/keys", verify="/run/lab/tls/ca.crt", trust_env=False, timeout=3); r.raise_for_status(); assert r.json().get("keys")'
-printf 'Local SPIRE, HTTPS JWKS and mock API are ready. Registration: protected.\n'
-printf 'Run: docker compose --profile exercise run --pull never --rm agent --ticket=ticket-alpha\n'
+printf 'Local SPIRE, HTTPS JWKS, OPA and mock API are ready. Registration: protected.\n'
+printf 'Run scripts/set-mode.sh protected read, then docker compose --profile exercise run --pull never --rm agent --ticket=ticket-alpha\n'

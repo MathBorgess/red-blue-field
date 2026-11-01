@@ -61,6 +61,22 @@ services:
       lab:
         aliases: [oidc.local]
 
+  opa:
+    image: openpolicyagent/opa:1.22.0@sha256:895872de1e8dc5b82e04f9410d2d1ada2f72d28fdcdba0e8789d91cfc27ec0d0
+    user: "10001:10001"
+    command: ["run", "--server", "--authorization=basic", "--addr=0.0.0.0:8181", "--log-level=error", "--log-level-request=error", "/policy/authz.rego", "/policy/api_authz.rego"]
+    volumes:
+      - ./policy/authz.rego:/policy/authz.rego:ro
+      - ./policy/api_authz.rego:/policy/api_authz.rego:ro
+    read_only: true
+    tmpfs: ["/tmp:size=8m,mode=1777"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 64
+    mem_limit: 128m
+    cpus: 0.15
+    networks: [policy]
+
   mock-api:
     build:
       context: ../..
@@ -68,13 +84,15 @@ services:
     user: "${LAB_UID:-1000}:${LAB_GID:-1000}"
     environment:
       LAB_MODE: ${LAB_MODE:-protected}
-      LAB_TASK_ID: task-alpha
+      LAB_TASK_KIND: ${LAB_TASK_KIND:-read}
+      LAB_TASK_ID: ${LAB_TASK_ID:-task-alpha}
       LAB_STATE_DIR: /lab/state
+      OPA_URL: http://opa:8181
       SPIRE_ISSUER: https://oidc.local:8443
       SPIRE_JWKS_URL: https://oidc.local:8443/keys
       SPIFFE_AGENT_ID: spiffe://fielddesk.test/agent
       TLS_CA_FILE: /run/lab/tls/ca.crt
-    depends_on: [oidc]
+    depends_on: [oidc, opa]
     volumes:
       - ./state/tls/ca.crt:/run/lab/tls/ca.crt:ro
       - ./state/data:/lab/state
@@ -85,7 +103,7 @@ services:
     pids_limit: 64
     mem_limit: 256m
     cpus: 0.35
-    networks: [lab]
+    networks: [lab, policy]
 
   agent:
     profiles: [exercise]
@@ -136,6 +154,8 @@ services:
 
 networks:
   lab:
+    internal: true
+  policy:
     internal: true
 
 volumes:

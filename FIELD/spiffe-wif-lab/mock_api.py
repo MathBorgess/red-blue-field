@@ -3,12 +3,14 @@
 Alice's authentication is a SYNTHETIC ASSUMPTION: a trusted fixture seeds one
 grant at process startup. A valid SPIRE JWT-SVID proves the workload identity,
 not that Alice authenticated or approved a new action. The grant is the only
-source of Alice's delegated authority. Never derive permissions from model text.
+source of task delegation; a separate synthetic rights table defines Alice's
+baseline permissions. Never derive permissions from model text.
 """
 
 from __future__ import annotations
 
 import base64
+import hashlib
 import json
 import math
 import os
@@ -19,7 +21,7 @@ import threading
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Awaitable, Callable
+from typing import Any, Awaitable, Callable, Literal
 from urllib.parse import urlsplit
 
 import httpx
@@ -27,7 +29,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import ec, padding, rsa, utils
 from fastapi import FastAPI, HTTPException, Request
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from red_blue_field.fielddesk import Denied, Fixture
 
@@ -38,6 +40,8 @@ ACCESS_AUDIENCE = "fielddesk-mock-api"
 MAX_JWT_BYTES = 16384
 MAX_JWKS_BYTES = 65536
 CLOCK_SKEW_SECONDS = 30
+OPA_DECISION_PATH = "/v1/data/fielddesk/authz/allow"
+OPA_RESPONSE_LIMIT = 8192
 
 
 class TokenError(Exception):
@@ -46,6 +50,10 @@ class TokenError(Exception):
 
 class ProviderError(Exception):
     """The trusted JWKS endpoint returned unusable identity-provider data."""
+
+
+class PolicyUnavailable(Exception):
+    """The local OPA sidecar could not make a trustworthy policy decision."""
 
 
 def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -175,6 +183,8 @@ class Settings:
     lab_mode: str = "protected"
     lab_task_id: str = "task-alpha"
     lab_state_dir: str | None = None
+    lab_task_kind: str = "read"
+    opa_url: str = "http://opa:8181"
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -186,6 +196,8 @@ class Settings:
             lab_mode=os.getenv("LAB_MODE", "protected"),
             lab_task_id=os.getenv("LAB_TASK_ID", "task-alpha"),
             lab_state_dir=os.getenv("LAB_STATE_DIR"),
+            lab_task_kind=os.getenv("LAB_TASK_KIND", "read"),
+            opa_url=os.getenv("OPA_URL", "http://opa:8181"),
         )
 
     def validate(self) -> None:
@@ -201,10 +213,17 @@ class Settings:
             raise ValueError("SPIRE_JWKS_URL must belong to the configured SPIRE_ISSUER")
         if not self.spiffe_agent_id.startswith("spiffe://") or not self.spiffe_agent_id[len("spiffe://"):]:
             raise ValueError("SPIFFE_AGENT_ID must be a SPIFFE ID")
-        if self.lab_mode not in {"protected", "weak_audience", "weak_tenant"}:
+        if self.lab_mode not in {"protected", "weak_audience", "weak_tenant", "opa_guard"}:
             raise ValueError("unsupported LAB_MODE")
         if not self.lab_task_id or len(self.lab_task_id) > 128:
             raise ValueError("invalid LAB_TASK_ID")
+        if self.lab_task_kind not in {"read", "insert"}:
+            raise ValueError("unsupported LAB_TASK_KIND")
+        expected_task = "task-alpha" if self.lab_task_kind == "read" else "task-insert-alpha"
+        if self.lab_task_id != expected_task:
+            raise ValueError("LAB_TASK_ID does not match LAB_TASK_KIND")
+        if self.opa_url != "http://opa:8181":
+            raise ValueError("OPA_URL must be the local policy sidecar")
 
 
 @dataclass
@@ -216,7 +235,9 @@ class Grant:
     task_id: str
     tenant: str
     action: str
-    ticket_id: str
+    resource_type: str
+    resource_id: str
+    approved_payload: str | None
     expires_at: float
     completed: bool = False
     revoked: bool = False
@@ -226,30 +247,68 @@ class Grant:
 
 
 class ExchangeRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     task_id: str = Field(min_length=1, max_length=128)
+
+
+class RecordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    table_id: Literal["orders_table", "orders_beta_table"]
+    target_tenant_id: Literal["tenant-a", "tenant-b"]
+    record_payload: Literal["pedido: 994", "pedido: 995"]
 
 
 class Broker:
     def __init__(self, settings: Settings, fixture: Fixture,
                  jwks_fetcher: Callable[[], Awaitable[dict[str, Any]]] | None,
-                 clock: Callable[[], float], event_path: Path | None = None):
+                 clock: Callable[[], float], event_path: Path | None = None,
+                 opa_decider: Callable[[dict[str, Any]], bool] | None = None):
         self.settings = settings
         self.fixture = fixture
         self.clock = clock
         self.lock = threading.RLock()
         self.signing_key = ec.generate_private_key(ec.SECP256R1())
+        action, resource_type, resource_id = (
+            ("ticket.read", "ticket", "ticket-alpha") if settings.lab_task_kind == "read"
+            else ("record.create", "table", "orders_table")
+        )
         self.grant = Grant(secrets.token_urlsafe(16), "alice", settings.spiffe_agent_id,
-                           settings.lab_task_id, "tenant-a", "ticket.read", "ticket-alpha",
+                           settings.lab_task_id, "tenant-a", action, resource_type, resource_id,
+                           "pedido: 994" if settings.lab_task_kind == "insert" else None,
                            clock() + 600)
         self.events: list[dict[str, Any]] = []
         self.event_path = event_path
         self.jwks_fetcher = jwks_fetcher or self._fetch_jwks
+        self.opa_decider = opa_decider
+        with self.fixture.db() as db:
+            db.executescript("""
+                CREATE TABLE IF NOT EXISTS lab_record_tables(id TEXT PRIMARY KEY, tenant_id TEXT NOT NULL);
+                CREATE TABLE IF NOT EXISTS lab_actor_rights(
+                    actor TEXT NOT NULL, tenant_id TEXT NOT NULL, action TEXT NOT NULL,
+                    resource_type TEXT NOT NULL, resource_id TEXT NOT NULL,
+                    PRIMARY KEY(actor, tenant_id, action, resource_type, resource_id));
+                CREATE TABLE IF NOT EXISTS lab_order_records(
+                    id INTEGER PRIMARY KEY, table_id TEXT NOT NULL,
+                    tenant_id TEXT NOT NULL, payload TEXT NOT NULL);
+            """)
+            db.executemany("INSERT OR IGNORE INTO lab_record_tables(id,tenant_id) VALUES(?,?)", [
+                ("orders_table", "tenant-a"), ("orders_beta_table", "tenant-b")
+            ])
+            db.executemany(
+                "INSERT OR IGNORE INTO lab_actor_rights(actor,tenant_id,action,resource_type,resource_id) "
+                "VALUES(?,?,?,?,?)",
+                [("alice", "tenant-a", "ticket.read", "ticket", "ticket-alpha"),
+                 ("alice", "tenant-a", "record.create", "table", "orders_table")],
+            )
 
-    def _record(self, decision: str, ticket_id: str | None = None) -> None:
+    def _record(self, decision: str, resource_id: str | None = None) -> None:
         # No credential, prompt, ticket body, or canary is stored in this ledger.
         with self.lock:
             event = {"at": self.clock(), "task_id": self.grant.task_id,
-                     "decision": decision, "ticket_id": ticket_id}
+                     "decision": decision, "resource_type": self.grant.resource_type,
+                     "resource_id": resource_id}
+            if self.grant.resource_type == "ticket":
+                event["ticket_id"] = resource_id
             self.events.append(event)
             if self.event_path:
                 descriptor = os.open(self.event_path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o600)
@@ -261,6 +320,57 @@ class Broker:
         with self.lock:
             self.grant.revoked = True
             self._record("revoked")
+
+    def _opa_allows(self, claims: dict[str, Any], action: str, resource_type: str,
+                    resource_id: str, resource_tenant: str, requested_tenant: str,
+                    requested_payload: str | None = None) -> bool:
+        """Only server-derived identity, grant and resource facts enter OPA."""
+        if self.settings.lab_mode == "weak_tenant":
+            self._record("policy_bypassed_weak_tenant", resource_id)
+            return True
+        grant = self.grant
+        with self.fixture.db() as db:
+            actor_rights = [dict(row) for row in db.execute(
+                "SELECT actor,tenant_id,action,resource_type,resource_id "
+                "FROM lab_actor_rights WHERE actor=? AND action=? AND resource_type=? AND resource_id=?",
+                (claims["actor"], action, resource_type, resource_id),
+            )]
+        input_document = {
+            "principal": {"sub": claims["actor"], "tenant_id": grant.tenant},
+            "actor_rights": actor_rights,
+            "workload": {"spiffe_id": claims["sub"]},
+            "task": {"id": claims["task_id"]},
+            "action": action,
+            "resource": {"type": resource_type, "id": resource_id, "tenant_id": resource_tenant},
+            "requested_tenant_id": requested_tenant,
+            "requested_payload": requested_payload,
+            "grant": {"actor": grant.actor, "workload_id": grant.workload_id,
+                      "task_id": grant.task_id, "action": grant.action,
+                      "resource_type": grant.resource_type, "resource_id": grant.resource_id,
+                      "tenant_id": grant.tenant, "approved_payload": grant.approved_payload,
+                      "active": grant.active(self.clock())},
+        }
+        try:
+            if self.opa_decider is not None:
+                decision = self.opa_decider(input_document)
+            else:
+                with httpx.Client(timeout=2, trust_env=False, follow_redirects=False) as client:
+                    response = client.post(self.settings.opa_url + OPA_DECISION_PATH,
+                                           json={"input": input_document})
+                    response.raise_for_status()
+                    if len(response.content) > OPA_RESPONSE_LIMIT:
+                        raise PolicyUnavailable("OPA response too large")
+                    decision = response.json().get("result")
+            if type(decision) is not bool:
+                raise PolicyUnavailable("OPA did not return a boolean decision")
+        except (httpx.HTTPError, ValueError, AttributeError) as error:
+            self._record("opa_unavailable", resource_id)
+            raise PolicyUnavailable("OPA decision unavailable") from error
+        except PolicyUnavailable:
+            self._record("opa_unavailable", resource_id)
+            raise
+        self._record("opa_allow" if decision else "opa_deny", resource_id)
+        return decision
 
     async def _fetch_jwks(self) -> dict[str, Any]:
         async with httpx.AsyncClient(verify=self.settings.tls_ca_file, timeout=5,
@@ -312,7 +422,8 @@ class Broker:
             expires = min(now + 60, grant.expires_at)
             claims = {"iss": ACCESS_ISSUER, "aud": ACCESS_AUDIENCE, "sub": grant.workload_id,
                       "actor": grant.actor, "task_id": grant.task_id, "grant_id": grant.grant_id,
-                      "tenant": grant.tenant, "action": grant.action, "ticket_id": grant.ticket_id,
+                      "tenant": grant.tenant, "action": grant.action,
+                      "resource_type": grant.resource_type, "resource_id": grant.resource_id,
                       "iat": int(now), "nbf": int(now), "exp": int(expires), "jti": secrets.token_urlsafe(16)}
             self._record("exchange_allowed")
             return _sign_es256(self.signing_key, claims), max(0, int(expires - now))
@@ -328,7 +439,9 @@ class Broker:
                 or claims.get("sub") != grant.workload_id or claims.get("actor") != grant.actor
                 or claims.get("task_id") != grant.task_id or claims.get("grant_id") != grant.grant_id
                 or claims.get("tenant") != grant.tenant or claims.get("action") != grant.action
-                or claims.get("ticket_id") != grant.ticket_id or not isinstance(claims.get("jti"), str)):
+                or claims.get("resource_type") != grant.resource_type
+                or claims.get("resource_id") != grant.resource_id
+                or not isinstance(claims.get("jti"), str)):
             raise TokenError("access token claim mismatch")
         return claims
 
@@ -339,13 +452,62 @@ class Broker:
             if not grant.active(self.clock()):
                 self._record("read_denied_inactive", ticket_id)
                 raise TokenError("task grant no longer active")
-            if self.settings.lab_mode != "weak_tenant" and ticket_id != grant.ticket_id:
+            if grant.action != "ticket.read" or grant.resource_type != "ticket":
                 self._record("read_denied_resource", ticket_id)
-                raise Denied("Ticket is outside the task grant")
+                raise Denied("Task grant does not authorize ticket reads")
+            self.fixture.guard()
+            with self.fixture.db() as db:
+                row = db.execute("SELECT tenant FROM tickets WHERE id=?", (ticket_id,)).fetchone()
+            if row is None:
+                self._record("read_denied_resource", ticket_id)
+                raise Denied("Unknown ticket")
+            if not self._opa_allows(claims, "ticket.read", "ticket", ticket_id,
+                                    row["tenant"], grant.tenant):
+                self._record("read_denied_policy", ticket_id)
+                raise Denied("OPA denied ticket read")
             result = self.fixture.ticket(ticket_id, tenant=claims["tenant"])
             grant.completed = True  # One successful task action consumes the grant.
             self._record("read_allowed_completed", ticket_id)
             return result
+
+    def insert_record(self, token: str, record: RecordRequest) -> dict[str, Any]:
+        with self.lock:
+            claims = self.verify_access(token)
+            grant = self.grant
+            if not grant.active(self.clock()):
+                self._record("record_denied_inactive", record.table_id)
+                raise TokenError("task grant no longer active")
+            if grant.action != "record.create" or grant.resource_type != "table":
+                self._record("record_denied_action", record.table_id)
+                raise Denied("Task grant does not authorize record creation")
+            if record.record_payload != grant.approved_payload:
+                self._record("record_denied_payload", record.table_id)
+                raise Denied("Task grant does not authorize this record")
+            self.fixture.guard()
+            with self.fixture.db() as db:
+                row = db.execute("SELECT tenant_id FROM lab_record_tables WHERE id=?",
+                                 (record.table_id,)).fetchone()
+            if row is None:
+                self._record("record_denied_resource", record.table_id)
+                raise Denied("Unknown table")
+            resource_tenant = row["tenant_id"]
+            if not self._opa_allows(claims, "record.create", "table", record.table_id,
+                                    resource_tenant, record.target_tenant_id,
+                                    record.record_payload):
+                self._record("record_denied_policy", record.table_id)
+                raise Denied("OPA denied record creation")
+            with self.fixture.db() as db:
+                cursor = db.execute(
+                    "INSERT INTO lab_order_records(table_id,tenant_id,payload) VALUES(?,?,?)",
+                    (record.table_id, record.target_tenant_id, record.record_payload))
+                record_id = cursor.lastrowid
+            if record.target_tenant_id != grant.tenant or resource_tenant != grant.tenant:
+                self.fixture.effect("cross_tenant_write", {"table_id": record.table_id,
+                                                            "tenant_id": record.target_tenant_id})
+            grant.completed = True
+            self._record("record_allowed_completed", record.table_id)
+            return {"created": True, "record_id": record_id, "table_id": record.table_id,
+                    "tenant_id": record.target_tenant_id}
 
 
 def _bearer(request: Request) -> str:
@@ -358,7 +520,8 @@ def _bearer(request: Request) -> str:
 
 def create_app(settings: Settings | None = None, fixture: Fixture | None = None,
                jwks_fetcher: Callable[[], Awaitable[dict[str, Any]]] | None = None,
-               clock: Callable[[], float] = time.time) -> FastAPI:
+               clock: Callable[[], float] = time.time,
+               opa_decider: Callable[[dict[str, Any]], bool] | None = None) -> FastAPI:
     settings = settings or Settings.from_env()
     settings.validate()
     if jwks_fetcher is None and not Path(settings.tls_ca_file).is_file():
@@ -375,19 +538,26 @@ def create_app(settings: Settings | None = None, fixture: Fixture | None = None,
         else:
             temporary_dir = tempfile.TemporaryDirectory(prefix="fielddesk-wif-")
             fixture_path = Path(temporary_dir.name) / "fixture.sqlite"
-        profile = "A" if settings.lab_mode == "weak_tenant" else "B"
+        profile = "A" if settings.lab_mode in {"weak_tenant", "opa_guard"} else "B"
         fixture = Fixture(fixture_path, profile, seed=1)
         if evidence_dir:
             fixture_path.chmod(0o600)
-    elif fixture.profile != ("A" if settings.lab_mode == "weak_tenant" else "B"):
+    elif fixture.profile != ("A" if settings.lab_mode in {"weak_tenant", "opa_guard"} else "B"):
         raise ValueError("Fixture profile must match LAB_MODE")
     broker = Broker(settings, fixture, jwks_fetcher, clock,
-                    evidence_dir / "events.jsonl" if evidence_dir else None)
+                    evidence_dir / "events.jsonl" if evidence_dir else None, opa_decider)
     if evidence_dir:
         manifest = {"lab_mode": settings.lab_mode, "task_id": broker.grant.task_id,
+                    "task_kind": settings.lab_task_kind,
                     "actor": broker.grant.actor, "workload_id": broker.grant.workload_id,
                     "tenant": broker.grant.tenant, "action": broker.grant.action,
-                    "ticket_id": broker.grant.ticket_id, "grant_source": "synthetic_controller",
+                    "resource_type": broker.grant.resource_type,
+                    "resource_id": broker.grant.resource_id,
+                    "ticket_id": broker.grant.resource_id if broker.grant.resource_type == "ticket" else None,
+                    "grant_source": "synthetic_controller",
+                    "actor_rights_source": "lab_actor_rights_synthetic",
+                    "approved_payload_sha256": (hashlib.sha256(broker.grant.approved_payload.encode()).hexdigest()
+                                                if broker.grant.approved_payload is not None else None),
                     "grant_expires_at": broker.grant.expires_at}
         manifest_path = evidence_dir / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
@@ -422,6 +592,20 @@ def create_app(settings: Settings | None = None, fixture: Fixture | None = None,
             raise HTTPException(status_code=401, detail="Invalid or inactive task credential") from None
         except Denied:
             raise HTTPException(status_code=403, detail="Ticket access denied") from None
+        except PolicyUnavailable:
+            raise HTTPException(status_code=503, detail="Policy decision unavailable") from None
+
+    @app.post("/records", status_code=201)
+    def insert_record(body: RecordRequest, request: Request):
+        try:
+            return broker.insert_record(_bearer(request), body)
+        except TokenError:
+            broker._record("record_denied_credential", body.table_id)
+            raise HTTPException(status_code=401, detail="Invalid or inactive task credential") from None
+        except Denied:
+            raise HTTPException(status_code=403, detail="Record creation denied") from None
+        except PolicyUnavailable:
+            raise HTTPException(status_code=503, detail="Policy decision unavailable") from None
 
     return app
 

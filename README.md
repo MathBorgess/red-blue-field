@@ -7,7 +7,7 @@ Laboratório de estudo de segurança com áreas para investigação, defesa e al
 - [RED](RED/README.md): investigação e testes dentro do escopo definido.
 - [BLUE](BLUE/README.md): análise, correção, contenção e reteste.
 - [FIELD](FIELD/README.md): aplicações e cenários de estudo, incluindo Northstar Tasks.
-- [SPIFFE/WIF no FieldDesk](FIELD/spiffe-wif-lab/README.md): identidade de workload, concessão de tarefa e autorização por objeto com o OpenAI Agents SDK.
+- [SPIFFE/WIF + OPA no FieldDesk](FIELD/spiffe-wif-lab/README.md): identidade de workload, concessão de tarefa e autorização por objeto com Rego e o OpenAI Agents SDK.
 - [Guia do FieldDesk](docs/running-the-lab.md): instalação e execução dos cenários locais.
 - [Estado da implementação](docs/implementation-status.md): componentes, limites e validação pendente.
 
@@ -19,7 +19,7 @@ O **FieldDesk** é o laboratório Python existente, com dados sintéticos e cen�
 
 O **Northstar Tasks** é uma aplicação sintética incluída em [FIELD](FIELD/codex-security-client-app/README.md), distribuída para revisão estática. O teste de comportamento legítimo descrito no próprio aplicativo é limitado e não comprova o funcionamento completo da aplicação.
 
-O **SPIFFE/WIF no FieldDesk** é uma bancada opcional e isolada. Ela usa SPIRE, uma API local de troca de tokens e os tickets sintéticos do FieldDesk para comparar três falhas de configuração. A chamada ao modelo via OpenAI Agents SDK é registrada separadamente dos controles determinísticos.
+O **SPIFFE/WIF + OPA no FieldDesk** é uma bancada opcional e isolada. Ela usa SPIRE, uma API local de troca de tokens, OPA/Rego, tickets e pedidos sintéticos para comparar falhas de atestação, audiência e autorização por objeto/tenant. A chamada ao modelo via OpenAI Agents SDK é registrada separadamente dos controles determinísticos.
 
 ## Integrações e evidências
 
