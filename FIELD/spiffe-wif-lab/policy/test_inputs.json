@@ -1,0 +1,84 @@
+{
+  "fielddesk_test_inputs": {
+    "read": {
+      "principal": {
+        "sub": "alice",
+        "tenant_id": "tenant-a"
+      },
+      "workload": {
+        "spiffe_id": "spiffe://fielddesk.test/agent"
+      },
+      "task": {
+        "id": "task-alpha"
+      },
+      "action": "ticket.read",
+      "resource": {
+        "type": "ticket",
+        "id": "ticket-alpha",
+        "tenant_id": "tenant-a"
+      },
+      "requested_tenant_id": "tenant-a",
+      "requested_payload": null,
+      "actor_rights": [
+        {
+          "actor": "alice",
+          "tenant_id": "tenant-a",
+          "action": "ticket.read",
+          "resource_type": "ticket",
+          "resource_id": "ticket-alpha"
+        }
+      ],
+      "grant": {
+        "actor": "alice",
+        "workload_id": "spiffe://fielddesk.test/agent",
+        "task_id": "task-alpha",
+        "action": "ticket.read",
+        "resource_type": "ticket",
+        "resource_id": "ticket-alpha",
+        "tenant_id": "tenant-a",
+        "active": true,
+        "approved_payload": null
+      }
+    },
+    "insert": {
+      "principal": {
+        "sub": "alice",
+        "tenant_id": "tenant-a"
+      },
+      "workload": {
+        "spiffe_id": "spiffe://fielddesk.test/agent"
+      },
+      "task": {
+        "id": "task-insert-alpha"
+      },
+      "action": "record.create",
+      "resource": {
+        "type": "table",
+        "id": "orders_table",
+        "tenant_id": "tenant-a"
+      },
+      "requested_tenant_id": "tenant-a",
+      "requested_payload": "pedido: 994",
+      "actor_rights": [
+        {
+          "actor": "alice",
+          "tenant_id": "tenant-a",
+          "action": "record.create",
+          "resource_type": "table",
+          "resource_id": "orders_table"
+        }
+      ],
+      "grant": {
+        "actor": "alice",
+        "workload_id": "spiffe://fielddesk.test/agent",
+        "task_id": "task-insert-alpha",
+        "action": "record.create",
+        "resource_type": "table",
+        "resource_id": "orders_table",
+        "tenant_id": "tenant-a",
+        "active": true,
+        "approved_payload": "pedido: 994"
+      }
+    }
+  }
+}
