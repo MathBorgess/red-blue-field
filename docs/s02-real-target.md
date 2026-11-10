@@ -68,6 +68,8 @@ default_tools_approval_mode = "prompt"
 
 Confirm the configuration against the installed client's supported schema before enabling it. Tool discovery in a protocol test does not itself establish that a Desktop session loaded the integration. [Official MCP configuration](https://learn.chatgpt.com/docs/extend/mcp?surface=cli).
 
+The bridge forwards valid protocol-version proposals so the server can negotiate a supported version, including when the client proposes a newer date. Malformed proposals and unsupported server replies are rejected. [MCP version negotiation](https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle#version-negotiation).
+
 ## Evidence and interruption
 
 Record episode/job IDs, frozen configuration, request/response IDs, reported usage, estimated cost, tool proposal, policy decision and effect separately. Do not persist private reasoning or opaque continuation items in public traces or exports. The model API uses `store=false`; this is not a claim of zero provider retention.

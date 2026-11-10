@@ -145,3 +145,17 @@ async def test_bridge_malformed_protocol_data_fails_closed():
         assert not sent
         response = await bridge.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})
         assert response["error"]["code"] == -32001
+
+
+@pytest.mark.asyncio
+async def test_bridge_allows_server_version_negotiation(app):
+    """A client's valid version proposal need not be in the bridge's own set."""
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app)) as http:
+        bridge = MCPRemoteBridge(RemoteLabClient("https://lab.example", ROLE, lambda: ACCESS, client=http), "episode-a")
+        response = await bridge.handle({"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                                        "params": {"protocolVersion": "2026-12-31"}})
+        assert response["result"]["protocolVersion"] == "2025-11-25"
+        for invalid in [None, 20261125, "2026-02-30", "20261125"]:
+            rejected = await bridge.handle({"jsonrpc": "2.0", "id": 2, "method": "initialize",
+                                            "params": {"protocolVersion": invalid}})
+            assert rejected["error"]["code"] == -32602
