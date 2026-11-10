@@ -9,6 +9,7 @@ Laboratório de estudo de segurança com áreas para investigação, defesa e al
 - [FIELD](FIELD/README.md): aplicações e cenários de estudo, incluindo Northstar Tasks.
 - [Guia do FieldDesk](docs/running-the-lab.md): instalação e execução dos cenários locais.
 - [Estado da implementação](docs/implementation-status.md): componentes, limites e validação pendente.
+- [S02 com alvo real separado](docs/s02-real-target.md): Codex operador por MCP remoto, alvo externo por API e avanço humano com orçamento persistente.
 
 `red_blue_field/` contém o núcleo compartilhado de controle, cenários e evidências. As pastas RED e BLUE organizam o trabalho por papel; não são fronteiras de segurança independentes. Defina o alvo, as ações permitidas e os limites de cada exercício antes de operar. Evidências e credenciais permanecem fora do repositório público.
 
@@ -21,5 +22,7 @@ O **Northstar Tasks** é uma aplicação sintética incluída em [FIELD](FIELD/c
 ## Integrações e evidências
 
 Há implementação de servidores MCP Red e Blue no núcleo. Sua conexão aos clientes e seu uso neste fluxo ainda precisam de validação; veja [MCP](docs/mcp-red-blue.md). A reorganização retira o fluxo próprio de chats e proxy: use o Codex local conforme a configuração do seu ambiente.
+
+O S02 também oferece um driver externo opt-in: o controlador não chama o modelo nem dá shell ao alvo. Um worker separado consome somente jobs liberados pelo pesquisador e usa uma chave dedicada. O bridge `rbf-mcp-remote` opera o laboratório remoto; os servidores stdio locais antigos não apontam para ele automaticamente. Configurar um cliente não comprova compatibilidade E2E ou resultado de segurança.
 
 Registre hipótese, alternativas, evidência observada, limite da validação e resultado do reteste. Uma falha identificada por leitura é uma hipótese até que a evidência sustente a conclusão. O [vocabulário](GLOSSARY.md) e o [desenho experimental](docs/experiment-design.md) dão mais contexto.

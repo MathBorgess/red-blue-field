@@ -20,7 +20,8 @@ from .config import Settings
 from .engine import Lab, TERMINAL
 from .evidence import digest, now, verify_export
 from .fielddesk import Denied
-from .models import Action, Assessment, CampaignRequest, FindingDecision, ReviewDecision, RunRequest, SignRequest, StrictModel
+from .models import (Action, Assessment, CampaignRequest, FindingDecision, ReviewDecision, RunRequest, SignRequest, StrictModel,
+                     TargetAdvance, TargetPrepare, TargetResult, TargetFailure)
 from .security import Halt, NeedsReview
 from .signing import sign_export, verify_signature
 from .tools import ALLOWED_TOOL_PROFILES, CASE_TOOLS, INTERNAL_CALL
@@ -148,6 +149,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise HTTPException(404, "Run not active in this process; inspect its persisted record")
         return lab.runs[run_id]
 
+    async def target_identity(run_id: str, authorization: str = Header(default="")):
+        run = get_run(run_id)
+        credential = authorization.removeprefix("Bearer ").strip()
+        expected = run.tokens.get("target", "")
+        if not expected or not credential or not hmac.compare_digest(credential.encode(), expected.encode()):
+            raise HTTPException(401, "Episode-scoped target identity required")
+        lab.targets.check_active(run)
+        return run
+
     async def participant(request: Request, run_id: str, authorization: str = Header(default="")):
         run = get_run(run_id)
         token = authorization.removeprefix("Bearer ")
@@ -192,6 +202,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/readiness", dependencies=[Depends(control)])
     async def readiness():
         return {"local_services": True, "scripted_agents": True, "model_broker": False,
+                "real_target_enabled": getattr(lab.settings, "real_target_enabled", False),
                 "workers_configured": bool(lab.settings.worker_a_url and lab.settings.worker_b_url),
                 "cloud_emulator": True, "cloud_live": "ready" if lab.cloud_adapter.ready() else "not_enabled_in_local_experiment",
                 "mcp_red": "ready", "mcp_blue": "ready", "recovered_interruptions": lab.interrupted,
@@ -243,13 +254,41 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if run.status in TERMINAL:
             raise HTTPException(409, 'Episode capabilities are closed; create a new episode')
         # Deliberately a controller-only capability minting/inspection operation.
-        return {
+        value = {
             "participant_token": run.tokens["red"],
             "blue_token": run.tokens["blue"],
             "reviewer_token": run.tokens["reviewer"],
             "target_base_path": f"/lab/{run_id}",
             "expires_at": run.scope["valid_until"],
         }
+        if run.live_model_target:
+            value["target_token"] = run.tokens["target"]
+        return value
+
+    @app.get("/api/runs/{run_id}/target", dependencies=[Depends(control)])
+    async def target_state(run_id: str):
+        return lab.targets.public(get_run(run_id))
+
+    @app.post("/api/runs/{run_id}/target/advance", dependencies=[Depends(control)])
+    async def target_advance(run_id: str, body: TargetAdvance):
+        return await lab.targets.advance(get_run(run_id), body.expected_revision, body.stage)
+
+    @app.get("/target/{run_id}/job")
+    async def target_claim(run_id: str, run=Depends(target_identity)):
+        job = await lab.targets.claim(run)
+        return job if job else Response(status_code=204)
+
+    @app.post("/target/{run_id}/jobs/{job_id}/prepare")
+    async def target_prepare(run_id: str, job_id: str, body: TargetPrepare, run=Depends(target_identity)):
+        return await lab.targets.prepare(run, job_id, body)
+
+    @app.post("/target/{run_id}/jobs/{job_id}/result")
+    async def target_result(run_id: str, job_id: str, body: TargetResult, run=Depends(target_identity)):
+        return await lab.targets.result(run, job_id, body)
+
+    @app.post("/target/{run_id}/jobs/{job_id}/failure")
+    async def target_failure(run_id: str, job_id: str, body: TargetFailure, run=Depends(target_identity)):
+        return await lab.targets.failure(run, job_id, body)
 
     @app.get("/api/runs/{run_id}/state", dependencies=[Depends(control)])
     async def state(run_id: str):
@@ -344,7 +383,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/sign", dependencies=[Depends(control)])
     async def sign(run_id: str, body: SignRequest):
         run = get_run(run_id)
-        if run.record_kind == "model_run":
+        if run.record_kind == "model_run" and not run.live_model_target:
             raise HTTPException(409, "Historical model runs are read-only")
         async with run.lock:
             if run.status not in TERMINAL:
@@ -373,7 +412,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/findings", dependencies=[Depends(control)])
     async def finding(run_id: str, body: FindingDecision, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
-        if run.record_kind == "model_run":
+        if run.record_kind == "model_run" and not run.live_model_target:
             raise HTTPException(409, "Historical model runs are read-only")
         if run.status not in TERMINAL:
             raise HTTPException(409, "Finish the episode before independent review")
@@ -413,7 +452,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/runs/{run_id}/assessments", dependencies=[Depends(control)])
     async def assess(run_id: str, body: Assessment, x_reviewer_id: str = Header(default="")):
         run = get_run(run_id)
-        if run.record_kind == "model_run":
+        if run.record_kind == "model_run" and not run.live_model_target:
             raise HTTPException(409, "Historical model runs are read-only")
         if run.status not in TERMINAL:
             raise HTTPException(409, "Finish the episode before assessment")

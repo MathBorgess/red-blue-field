@@ -21,6 +21,8 @@ aws = ["boto3>=1.35,<2"]
 rbf = "red_blue_field.cli:main"
 rbf-mcp-red = "red_blue_field.mcp:main_red"
 rbf-mcp-blue = "red_blue_field.mcp:main_blue"
+rbf-mcp-remote = "red_blue_field.mcp_bridge:main"
+rbf-target-worker = "red_blue_field.real_target_worker:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["red_blue_field"]

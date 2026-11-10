@@ -178,6 +178,10 @@ class ToolBroker:
 
     async def target(self, instruction: str) -> dict:
         r = self.run
+        if r.request.target_driver == "openai_external":
+            if instruction:
+                raise Denied("Real target task is fixed; untrusted input belongs in the scenario document", "target_gateway")
+            return r.manager.targets.request_activation(r)
         if r.fixture.state("tool_suspended"):
             raise Denied("Target tool suspended", "tool_gateway")
         if r.request.profile != "A" and r.request.scenario_id == "S03" and r.fixture.state("tool_metadata")["version"] != 1 and not r.request.benign:

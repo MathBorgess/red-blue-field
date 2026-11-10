@@ -35,6 +35,8 @@ class Settings:
     worker_b_token: str = field(default_factory=lambda: os.getenv("RBF_WORKER_B_TOKEN", ""), repr=False)
     aws_config: Path | None = None
     auto_recreate_workers: bool = field(default_factory=lambda: os.getenv("RBF_AUTO_RECREATE_WORKERS", "0") == "1")
+    real_target_enabled: bool = field(default_factory=lambda: os.getenv("RBF_ENABLE_REAL_TARGET", "0") == "1")
+    real_target_pilot_id: str = field(default_factory=lambda: os.getenv("RBF_REAL_TARGET_PILOT_ID", "s02-pilot"))
     code_revision: str = field(default_factory=revision)
 
     def prepare(self) -> None:
