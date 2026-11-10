@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any, Literal, Annotated
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -20,6 +20,8 @@ class RunRequest(StrictModel):
     scenario_id: str = Field(default="S01", pattern=r"^S(0[1-9]|1[0-8])$")
     profile: Literal["A", "B", "C", "D"] = "B"
     mode: Literal["manual", "scripted", "agent_assisted", "bounded_autonomous"] = "scripted"
+    target_driver: Literal["scripted", "openai_external"] = "scripted"
+    target_smoke: bool = False
     reviewer: Literal["human_reviewer", "scripted_reviewer"] = "human_reviewer"
     environment: Literal["local_live", "cloud_emulated", "cloud_live"] | None = None
     seed: int = Field(default=1, ge=0, le=2**31 - 1)
@@ -35,6 +37,57 @@ class Action(StrictModel):
     name: str = Field(min_length=1, max_length=80)
     arguments: dict[str, Any] = Field(default_factory=dict)
     reason: str = Field(default="Teste da hipótese", max_length=1000)
+
+
+class TargetAdvance(StrictModel):
+    expected_revision: int = Field(ge=0)
+    stage: Literal["model", "tool"]
+
+
+class TargetPrepare(StrictModel):
+    lease_token: str = Field(min_length=24, max_length=200)
+    input_tokens: int = Field(ge=1, le=12000)
+    request_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    expected_revision: int = Field(ge=0)
+
+
+class TargetUsage(StrictModel):
+    input_tokens: int = Field(ge=0, le=12000)
+    output_tokens: int = Field(ge=0, le=2000)
+    cached_input_tokens: int = Field(default=0, ge=0, le=12000)
+
+
+class TargetToolOutput(StrictModel):
+    kind: Literal["tool_call"]
+    call_id: str = Field(min_length=1, max_length=200)
+    name: str = Field(min_length=1, max_length=80)
+    arguments: dict[str, Any]
+
+
+class TargetMessageOutput(StrictModel):
+    kind: Literal["message"]
+    text: str = Field(max_length=16000)
+
+
+class TargetResult(StrictModel):
+    lease_token: str = Field(min_length=24, max_length=200)
+    reservation_id: str = Field(min_length=1, max_length=200)
+    request_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    response_id: str = Field(min_length=1, max_length=200)
+    provider_request_id: str | None = Field(default=None, max_length=200)
+    model: str = Field(min_length=1, max_length=100)
+    service_tier: str = Field(max_length=50)
+    status: str = Field(max_length=50)
+    usage: TargetUsage
+    output: Annotated[TargetToolOutput | TargetMessageOutput, Field(discriminator="kind")]
+
+
+class TargetFailure(StrictModel):
+    lease_token: str = Field(min_length=24, max_length=200)
+    reservation_id: str | None = Field(default=None, max_length=200)
+    request_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    submitted: bool
+    reason: str = Field(min_length=3, max_length=500)
 
 
 class ReviewDecision(StrictModel):

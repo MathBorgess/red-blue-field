@@ -8,6 +8,7 @@ O repositório reúne trabalho de [RED](../RED/README.md), [BLUE](../BLUE/README
 | FieldDesk | Aplicação, cenários, controlador e evidências no núcleo Python compartilhado. Modos manual e roteiro fixo são mantidos. |
 | Ferramentas e defesa | Perfis e ações definidos pelo laboratório; a pasta RED ou BLUE não amplia suas permissões. |
 | MCP Red e Blue | Código de servidores presente. Conexão ao Codex e funcionamento no fluxo reorganizado ainda não foram validados. |
+| S02 alvo externo | Driver opt-in com jobs, papéis, avanço humano e ledger persistente; worker de API e bridge MCP separados. Disponibilidade da chave/modelo e conexão no cliente exigem validação específica; testes com transporte falso não comprovam inferência real. |
 | Formação | A competência depende de prática, explicação, evidência e revisão humana; testes automáticos não a demonstram. |
 
 O núcleo reúne responsabilidades em `red_blue_field/`; avaliar o que ainda é necessário é um trabalho posterior. Testes de cenários conhecidos demonstram os comportamentos que exercitam, sujeitos ao resultado da execução efetiva. A validação desta reorganização deve ser registrada junto à mudança, sem presumir que provas anteriores se repetiram.
