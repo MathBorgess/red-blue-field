@@ -4,7 +4,9 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import re
 import sys
+from datetime import date
 
 from .evidence import canonical
 from .remote_clients import ClientError, CloudflareAccess, RemoteLabClient, identifier, role_token_file
@@ -35,8 +37,16 @@ class MCPRemoteBridge:
         method, params = message["method"], message.get("params", {})
         if not isinstance(params, dict):
             return protocol_error(request_id, -32602, "Invalid MCP parameters")
-        if method == "initialize" and params.get("protocolVersion") not in PROTOCOLS:
-            return protocol_error(request_id, -32602, "Unsupported MCP protocol version")
+        if method == "initialize":
+            requested = params.get("protocolVersion")
+            try:
+                if not isinstance(requested, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}", requested):
+                    raise ValueError
+                date.fromisoformat(requested)
+            except ValueError:
+                return protocol_error(request_id, -32602, "Invalid MCP protocol version")
+            # The server negotiates a version it supports. Rejecting a newer
+            # client's proposal here would prevent the standard MCP fallback.
         if method == "tools/call":
             arguments = params.get("arguments")
             if (not isinstance(params.get("name"), str) or not params["name"].startswith(self.role + ".")
